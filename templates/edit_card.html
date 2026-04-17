@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <section>
+    <h2>Kartı Düzenle</h2>
+    <form method="post">
+      <label for="question">Soru</label>
+      <textarea id="question" name="question" rows="3">{{ card.question }}</textarea>
+      <label for="answer">Cevap</label>
+      <textarea id="answer" name="answer" rows="4">{{ card.answer }}</textarea>
+      <label for="source">Kaynak Metin</label>
+      <textarea id="source" name="source" rows="2">{{ card.source }}</textarea>
+      <button type="submit">Güncelle</button>
+      <a href="{{ url_for('main.cards') }}" class="button-secondary">İptal</a>
+    </form>
+  </section>
+{% endblock %}

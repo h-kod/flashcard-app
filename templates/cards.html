@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <section>
+    <h2>Kaydedilmiş Kartlar</h2>
+    {% if cards %}
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Soru</th>
+            <th>Cevap</th>
+            <th>Kaynak</th>
+            <th>İşlemler</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for card in cards %}
+            <tr>
+              <td>{{ card.id }}</td>
+              <td>{{ card.question }}</td>
+              <td>{{ card.answer }}</td>
+              <td>{{ card.source }}</td>
+              <td>
+                <a href="{{ url_for('main.edit_card', card_id=card.id) }}">Düzenle</a>
+                <form method="post" action="{{ url_for('main.delete_card_route', card_id=card.id) }}" class="inline-form">
+                  <button type="submit">Sil</button>
+                </form>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p>Henüz kaydedilmiş kart yok.</p>
+    {% endif %}
+  </section>
+{% endblock %}

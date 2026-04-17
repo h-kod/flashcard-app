@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Flashcard Generator</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+  </head>
+  <body>
+    <header>
+      <div class="container">
+        <h1>Flashcard & Q&A Üretim Sistemi</h1>
+        <nav>
+          <a href="{{ url_for('main.index') }}">Ana Sayfa</a>
+          <a href="{{ url_for('main.cards') }}">Kaydedilen Kartlar</a>
+          <a href="{{ url_for('main.export_cards') }}?format=csv">Export CSV</a>
+          <a href="{{ url_for('main.export_cards') }}?format=json">Export JSON</a>
+        </nav>
+      </div>
+    </header>
+    <main class="container">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flash-area">
+          {% for category, message in messages %}
+            <div class="flash {{ category }}">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+      {% endwith %}
+      {% block content %}{% endblock %}
+    </main>
+    <footer>
+      <div class="container">Öğrenci projesi demo uygulaması.</div>
+    </footer>
+  </body>
+</html>

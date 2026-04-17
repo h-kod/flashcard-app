@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <section class="hero">
+    <h2>Ders notunuzu yapıştırın veya dosya yükleyin</h2>
+    <form method="post" enctype="multipart/form-data">
+      <label for="note_text">Not metni</label>
+      <textarea id="note_text" name="note_text" rows="8">{{ input_text }}</textarea>
+      <label for="note_file">Veya dosya seçin</label>
+      <input type="file" id="note_file" name="note_file" accept=".txt">
+      <button type="submit">Üret</button>
+    </form>
+  </section>
+
+  {% if summary %}
+    <section>
+      <h3>Oluşturulan Özet</h3>
+      <p>{{ summary }}</p>
+    </section>
+  {% endif %}
+
+  {% if keywords %}
+    <section>
+      <h3>Anahtar Kavramlar</h3>
+      <div class="tag-list">
+        {% for item in keywords %}
+          <span class="tag">{{ item }}</span>
+        {% endfor %}
+      </div>
+    </section>
+  {% endif %}
+
+  {% if flashcards %}
+    <section>
+      <h3>Flashcard Önerileri</h3>
+      <div class="card-grid">
+        {% for card in flashcards %}
+          <div class="card">
+            <h4>{{ card.question }}</h4>
+            <p>{{ card.answer }}</p>
+            <form method="post" action="{{ url_for('main.save_card_route') }}">
+              <input type="hidden" name="question" value="{{ card.question }}">
+              <input type="hidden" name="answer" value="{{ card.answer }}">
+              <input type="hidden" name="source" value="{{ card.source }}">
+              <button type="submit">Kaydet</button>
+            </form>
+          </div>
+        {% endfor %}
+      </div>
+    </section>
+  {% endif %}
+
+  {% if qas %}
+    <section>
+      <h3>Soru-Cevap Önerileri</h3>
+      <div class="qa-grid">
+        {% for item in qas %}
+          <div class="qa">
+            <p><strong>Soru:</strong> {{ item.question }}</p>
+            <p><strong>Cevap:</strong> {{ item.answer }}</p>
+          </div>
+        {% endfor %}
+      </div>
+    </section>
+  {% endif %}
+{% endblock %}

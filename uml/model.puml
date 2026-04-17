@@ -1,0 +1,46 @@
+@startuml Class Diagram
+
+class FlaskApp {
+  + create_app(): Flask
+  + run(): void
+}
+
+class Database {
+  + init_db(app): void
+  + get_db(app): Connection
+  + close_db(): void
+}
+
+class Card {
+  - id: int
+  - question: str
+  - answer: str
+  - source: str
+  - created_at: str
+  + save(app): int
+  + list(app): List[Dict]
+  + get(app, id): Dict
+  + update(app, id): void
+  + delete(app, id): void
+}
+
+class NLPUtils {
+  + clean_text(text: str): str
+  + summarize_text(text: str): str
+  + extract_keywords(text: str): List[str]
+  + generate_flashcards(text: str): List[Dict]
+  + generate_qa_pairs(text: str): List[Dict]
+}
+
+class Routes {
+  + index(): Response
+  + save_card(): Response
+}
+
+FlaskApp --> Database : initializes
+FlaskApp --> Routes : registers
+Routes --> NLPUtils : uses for processing
+Routes --> Card : manages cards
+Database --> Card : stores data
+
+@enduml
