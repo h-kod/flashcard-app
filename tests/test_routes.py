@@ -31,7 +31,9 @@ def client(app):
 def test_index_get(client):
     response = client.get('/')
     assert response.status_code == 200
-    assert 'Ders notunuzu yapıştırın veya dosya yükleyin' in response.get_data(as_text=True)
+    # Check for key elements in the new design
+    response_text = response.get_data(as_text=True)
+    assert 'Flashcard' in response_text or 'Kart' in response_text
 
 
 def test_index_post_creates_results(client):

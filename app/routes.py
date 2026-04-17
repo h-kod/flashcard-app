@@ -16,21 +16,23 @@ def index():
         'flashcards': [],
         'qas': [],
         'input_text': '',
+        'selected_count': 5,
     }
     if request.method == 'POST':
         raw_text = request.form.get('note_text', '')
+        card_count = int(request.form.get('card_count', 5) or 5)
         upload = request.files.get('note_file')
         if upload and upload.filename:
             raw_text = upload.read().decode('utf-8', errors='ignore')
 
         text = clean_text(raw_text)
         if not text:
-            flash('Please provide text or upload a note file.', 'warning')
+            flash('Lütfen metin girin veya bir dosya yükleyin.', 'warning')
             return render_template('index.html', **context)
 
         summary = summarize_text(text)
         keywords = extract_keywords(text)
-        flashcards = generate_flashcards(text)
+        flashcards = generate_flashcards(text, max_cards=card_count)
         qas = generate_qa_pairs(text)
         context.update({
             'summary': summary,
@@ -38,6 +40,7 @@ def index():
             'flashcards': flashcards,
             'qas': qas,
             'input_text': text,
+            'selected_count': card_count,
         })
     return render_template('index.html', **context)
 
@@ -48,10 +51,10 @@ def save_card_route():
     answer = request.form.get('answer', '').strip()
     source = request.form.get('source', '').strip()
     if not question or not answer:
-        flash('Question and answer are required to save a card.', 'danger')
+        flash('Kart kaydetmek için soru ve cevap gereklidir.', 'danger')
         return redirect(url_for('main.index'))
     save_card(current_app, question, answer, source)
-    flash('Card saved successfully.', 'success')
+    flash('Kart başarıyla kaydedildi.', 'success')
     return redirect(url_for('main.cards'))
 
 
@@ -65,17 +68,17 @@ def cards():
 def edit_card(card_id):
     card = get_card(current_app, card_id)
     if not card:
-        flash('Card not found.', 'danger')
+        flash('Kart bulunamadı.', 'danger')
         return redirect(url_for('main.cards'))
     if request.method == 'POST':
         question = request.form.get('question', '').strip()
         answer = request.form.get('answer', '').strip()
         source = request.form.get('source', '').strip()
         if not question or not answer:
-            flash('Question and answer are required.', 'danger')
+            flash('Kartı güncellemek için soru ve cevap gereklidir.', 'danger')
             return redirect(url_for('main.edit_card', card_id=card_id))
         update_card(current_app, card_id, question, answer, source)
-        flash('Card updated successfully.', 'success')
+        flash('Kart başarıyla güncellendi.', 'success')
         return redirect(url_for('main.cards'))
     return render_template('edit_card.html', card=card)
 
@@ -83,7 +86,7 @@ def edit_card(card_id):
 @bp.route('/cards/<int:card_id>/delete', methods=['POST'])
 def delete_card_route(card_id):
     delete_card(current_app, card_id)
-    flash('Card deleted successfully.', 'success')
+    flash('Kart silindi.', 'success')
     return redirect(url_for('main.cards'))
 
 

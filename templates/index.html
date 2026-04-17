@@ -1,66 +1,115 @@
 {% extends 'base.html' %}
 
 {% block content %}
-  <section class="hero">
-    <h2>Ders notunuzu yapıştırın veya dosya yükleyin</h2>
-    <form method="post" enctype="multipart/form-data">
-      <label for="note_text">Not metni</label>
-      <textarea id="note_text" name="note_text" rows="8">{{ input_text }}</textarea>
-      <label for="note_file">Veya dosya seçin</label>
-      <input type="file" id="note_file" name="note_file" accept=".txt">
-      <button type="submit">Üret</button>
-    </form>
-  </section>
-
-  {% if summary %}
-    <section>
-      <h3>Oluşturulan Özet</h3>
-      <p>{{ summary }}</p>
-    </section>
-  {% endif %}
-
-  {% if keywords %}
-    <section>
-      <h3>Anahtar Kavramlar</h3>
-      <div class="tag-list">
-        {% for item in keywords %}
-          <span class="tag">{{ item }}</span>
-        {% endfor %}
+  <!-- Main Container -->
+  <div class="content-container">
+    <!-- Form Section -->
+    <div class="form-section">
+      <div class="hero">
+        <h2 style="font-family: 'Manrope', sans-serif; margin-bottom: 1.5rem; font-size: 1.5rem;">Ders Notlarından Flashcard Üret</h2>
+        <form method="post" enctype="multipart/form-data">
+          <label for="note_text">Not Metni</label>
+          <textarea id="note_text" name="note_text" rows="6" placeholder="Ders notunuzu buraya yapıştırın...">{{ input_text }}</textarea>
+          
+          <label for="note_file" style="margin-top: 1.5rem;">Veya Dosya Seçin</label>
+          <input type="file" id="note_file" name="note_file" accept=".txt">
+          
+          <label for="card_count" style="margin-top: 1.5rem;">Kart Sayısı</label>
+          <select id="card_count" name="card_count">
+            <option value="5" {% if selected_count == 5 %}selected{% endif %}>5 Kart</option>
+            <option value="10" {% if selected_count == 10 %}selected{% endif %}>10 Kart</option>
+            <option value="20" {% if selected_count == 20 %}selected{% endif %}>20 Kart</option>
+          </select>
+          
+          <button type="submit" style="width: 100%; margin-top: 1.5rem;">Flashcard Üret</button>
+        </form>
       </div>
-    </section>
-  {% endif %}
 
-  {% if flashcards %}
-    <section>
-      <h3>Flashcard Önerileri</h3>
-      <div class="card-grid">
-        {% for card in flashcards %}
-          <div class="card">
-            <h4>{{ card.question }}</h4>
-            <p>{{ card.answer }}</p>
-            <form method="post" action="{{ url_for('main.save_card_route') }}">
-              <input type="hidden" name="question" value="{{ card.question }}">
-              <input type="hidden" name="answer" value="{{ card.answer }}">
-              <input type="hidden" name="source" value="{{ card.source }}">
-              <button type="submit">Kaydet</button>
-            </form>
+      <!-- Summary Section -->
+      {% if summary %}
+        <section class="summary-section">
+          <h3>Özet</h3>
+          <p>{{ summary }}</p>
+        </section>
+      {% endif %}
+
+      <!-- Keywords Section -->
+      {% if keywords %}
+        <section class="keywords-section">
+          <h3>Anahtar Kavramlar</h3>
+          <div class="tag-list">
+            {% for item in keywords %}
+              <span class="tag">{{ item }}</span>
+            {% endfor %}
           </div>
-        {% endfor %}
-      </div>
-    </section>
-  {% endif %}
+        </section>
+      {% endif %}
+    </div>
 
-  {% if qas %}
-    <section>
-      <h3>Soru-Cevap Önerileri</h3>
-      <div class="qa-grid">
-        {% for item in qas %}
-          <div class="qa">
-            <p><strong>Soru:</strong> {{ item.question }}</p>
-            <p><strong>Cevap:</strong> {{ item.answer }}</p>
+    <!-- Flashcard Display Section -->
+    {% if flashcards %}
+      <div class="cards-section">
+        <div class="cards-header">
+          <div>
+            <span class="label-text">Flashcard Kartları</span>
+            <h3>Çalışma Kartları</h3>
           </div>
-        {% endfor %}
+          <span id="card-position" class="card-counter">1 / {{ flashcards|length }}</span>
+        </div>
+        
+        <div class="stack-wrapper">
+          <div class="stack-container" id="flashcard-stack">
+            {% for card in flashcards %}
+              <div class="stack-card" data-index="{{ loop.index0 }}">
+                <div class="card-content">
+                  <div style="text-align: center; margin-bottom: 1.5rem;">
+                    <p style="font-size: 1.1rem; color: var(--on-surface-variant); margin-bottom: 0.5rem; font-size: 0.875rem;">Soru</p>
+                    <p style="font-size: 1.5rem; font-weight: 700; line-height: 1.4;">{{ card.question }}</p>
+                  </div>
+                  <hr style="border: none; border-top: 1px solid var(--outline-variant); margin: 1.5rem 0;">
+                  <div style="text-align: center;">
+                    <p style="font-size: 1.1rem; color: var(--on-surface-variant); margin-bottom: 0.5rem; font-size: 0.875rem;">Cevap</p>
+                    <p style="font-size: 1.1rem; line-height: 1.6;">{{ card.answer }}</p>
+                  </div>
+                </div>
+                <form method="post" action="{{ url_for('main.save_card_route') }}" class="card-save-form">
+                  <input type="hidden" name="question" value="{{ card.question }}">
+                  <input type="hidden" name="answer" value="{{ card.answer }}">
+                  <input type="hidden" name="source" value="{{ card.source }}">
+                  <button type="submit" class="save-btn">💾 Kaydet</button>
+                </form>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="cards-controls">
+          <button type="button" id="prev-card" class="control-btn">← Önceki</button>
+          <button type="button" id="next-card" class="control-btn">Sonraki →</button>
+        </div>
       </div>
-    </section>
-  {% endif %}
+    {% endif %}
+
+    <!-- Q&A Section -->
+    {% if qas %}
+      <section class="qas-section">
+        <h3>Soru-Cevap Önerileri</h3>
+        <div class="qa-grid">
+          {% for item in qas %}
+            <div class="qa-item">
+              <div class="qa-question">
+                <strong>S:</strong> {{ item.question }}
+              </div>
+              <div class="qa-answer">
+                <strong>C:</strong> {{ item.answer }}
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </section>
+    {% endif %}
+  </div>
+
+  <script src="{{ url_for('static', filename='js/stack.js') }}"></script>
 {% endblock %}

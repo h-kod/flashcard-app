@@ -1,21 +1,34 @@
 import re
 from collections import Counter
+from typing import Dict, List
 
 try:
     import spacy
-    nlp = spacy.blank('en')
+    nlp = spacy.blank('tr')
     if not nlp.pipe_names:
         nlp.add_pipe('sentencizer')
 except ImportError:
     nlp = None
 
 STOPWORDS = {
+    'bir', 've', 'veya', 'da', 'de', 'ile', 'ben', 'sen', 'o', 'bu', 'şu',
+    'ama', 'fakat', 'çünkü', 'ise', 'ki', 'bile', 'çok', 'az', 'en', 'için',
+    'gibi', 'var', 'yok', 'olarak', 'tarafından', 'değil', 'olan', 'olanlar',
+    'olanı', 'olanlar', 'bazı', 'her', 'herkes', 'şey', 'şu', 'sanki', 'ama',
+    'daima', 'herhangi', 'aynı', 'yeni', 'son', 'önce', 'sonra', 'daha', 'ise',
+    'ne', 'nasıl', 'nerede', 'zaman', 'kadar', 'sadece',
     'a', 'an', 'and', 'are', 'as', 'at', 'be', 'by', 'for', 'from',
     'has', 'he', 'in', 'is', 'it', 'its', 'of', 'on', 'that', 'the',
     'to', 'was', 'were', 'will', 'with', 'this', 'these', 'those',
     'or', 'if', 'but', 'not', 'can', 'may', 'should', 'could', 'would',
     'also', 'so', 'we', 'they', 'their', 'them', 'our', 'you', 'your',
 }
+
+QUESTION_TEMPLATES = [
+    "'{keyword}' kavramı bu cümlede ne anlama geliyor?",
+    "Metinde '{keyword}' nasıl tanımlanıyor?",
+    "Neden '{keyword}' bu notta önemli?",
+]
 
 
 def clean_text(text: str) -> str:
@@ -24,7 +37,7 @@ def clean_text(text: str) -> str:
     return text
 
 
-def split_sentences(text: str) -> list[str]:
+def split_sentences(text: str) -> List[str]:
     text = clean_text(text)
     if nlp is not None:
         doc = nlp(text)
@@ -35,14 +48,23 @@ def split_sentences(text: str) -> list[str]:
     return sentences
 
 
-def extract_words(text: str) -> list[str]:
-    return [word.lower() for word in re.findall(r"[A-Za-z']+", text) if word.lower() not in STOPWORDS]
+def normalize_word(word: str) -> str:
+    return word.lower().strip("'\".,:;()[]{}")
 
 
-def extract_keywords(text: str, top_n: int = 8) -> list[str]:
-    words = extract_words(text)
-    most_common = Counter(words).most_common(top_n)
-    return [word for word, _ in most_common]
+def extract_words(text: str) -> List[str]:
+    return [normalize_word(word) for word in re.findall(r"[A-Za-zığüşöçİĞÜŞÖÇ']+", text, flags=re.UNICODE)
+            if normalize_word(word) not in STOPWORDS and len(normalize_word(word)) > 2]
+
+
+def word_frequencies(text: str) -> Counter:
+    return Counter(extract_words(text))
+
+
+def extract_keywords(text: str, top_n: int = 8) -> List[str]:
+    freq = word_frequencies(text)
+    most_common = [word for word, count in freq.most_common(top_n) if count > 0]
+    return most_common
 
 
 def summarize_text(text: str, max_sentences: int = 3) -> str:
@@ -52,11 +74,11 @@ def summarize_text(text: str, max_sentences: int = 3) -> str:
     if len(sentences) <= max_sentences:
         return ' '.join(sentences)
 
-    keywords = set(extract_keywords(text, top_n=12))
-    scored = []
+    freq = word_frequencies(text)
+    scored: List[tuple[int, str]] = []
     for sentence in sentences:
-        words = set(extract_words(sentence))
-        score = len(words & keywords)
+        words = extract_words(sentence)
+        score = sum(freq[word] for word in set(words))
         scored.append((score, sentence))
 
     scored.sort(key=lambda item: item[0], reverse=True)
@@ -65,29 +87,48 @@ def summarize_text(text: str, max_sentences: int = 3) -> str:
     return ' '.join(selected)
 
 
-def generate_flashcards(text: str, max_cards: int = 5) -> list[dict[str, str]]:
+def build_question(keyword: str) -> str:
+    template = QUESTION_TEMPLATES[hash(keyword) % len(QUESTION_TEMPLATES)]
+    return template.format(keyword=keyword)
+
+
+def generate_flashcards(text: str, max_cards: int = 5) -> List[Dict[str, str]]:
     sentences = split_sentences(text)
-    keywords = extract_keywords(text, top_n=12)
-    cards = []
-    for sentence in sentences:
+    keywords = extract_keywords(text, top_n=10)
+    cards: List[Dict[str, str]] = []
+    used_sentences = set()
+
+    for keyword in keywords:
         if len(cards) >= max_cards:
             break
-        if any(keyword in sentence.lower() for keyword in keywords[:3]):
-            question = 'What is the key idea of this sentence?'
-            answer = sentence
-            cards.append({'question': question, 'answer': answer, 'source': sentence})
+        for sentence in sentences:
+            if sentence in used_sentences:
+                continue
+            if keyword in sentence.lower():
+                question = build_question(keyword)
+                answer = sentence
+                cards.append({'question': question, 'answer': answer, 'source': sentence})
+                used_sentences.add(sentence)
+                break
 
     if not cards and sentences:
-        cards.append({'question': 'What is the main idea?', 'answer': sentences[0], 'source': sentences[0]})
-    return cards
+        cards.append({
+            'question': 'Notun ana fikri nedir?',
+            'answer': sentences[0],
+            'source': sentences[0],
+        })
+    return cards[:max_cards]
 
 
-def generate_qa_pairs(text: str, max_pairs: int = 5) -> list[dict[str, str]]:
-    keywords = extract_keywords(text, top_n=5)
-    qa = []
+def generate_qa_pairs(text: str, max_pairs: int = 5) -> List[Dict[str, str]]:
+    sentences = split_sentences(text)
+    keywords = extract_keywords(text, top_n=max_pairs)
+    qa: List[Dict[str, str]] = []
+
     for keyword in keywords:
-        question = f"What does '{keyword}' refer to in the text?"
-        answer = f"The text highlights '{keyword}' as an important concept or term."
+        answer_sentence = next((sentence for sentence in sentences if keyword in sentence.lower()), '')
+        question = f"Metinde '{keyword}' neyi ifade ediyor?"
+        answer = answer_sentence if answer_sentence else f"'{keyword}' metnin önemli kavramlarından biridir."
         qa.append({'question': question, 'answer': answer})
         if len(qa) >= max_pairs:
             break
