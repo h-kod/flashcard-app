@@ -1,115 +1,81 @@
 {% extends 'base.html' %}
 
 {% block content %}
-  <!-- Main Container -->
-  <div class="content-container">
-    <!-- Form Section -->
-    <div class="form-section">
-      <div class="hero">
-        <h2 style="font-family: 'Manrope', sans-serif; margin-bottom: 1.5rem; font-size: 1.5rem;">Ders Notlarından Flashcard Üret</h2>
-        <form method="post" enctype="multipart/form-data">
-          <label for="note_text">Not Metni</label>
-          <textarea id="note_text" name="note_text" rows="6" placeholder="Ders notunuzu buraya yapıştırın...">{{ input_text }}</textarea>
-          
-          <label for="note_file" style="margin-top: 1.5rem;">Veya Dosya Seçin</label>
-          <input type="file" id="note_file" name="note_file" accept=".txt">
-          
-          <label for="card_count" style="margin-top: 1.5rem;">Kart Sayısı</label>
-          <select id="card_count" name="card_count">
-            <option value="5" {% if selected_count == 5 %}selected{% endif %}>5 Kart</option>
-            <option value="10" {% if selected_count == 10 %}selected{% endif %}>10 Kart</option>
-            <option value="20" {% if selected_count == 20 %}selected{% endif %}>20 Kart</option>
-          </select>
-          
-          <button type="submit" style="width: 100%; margin-top: 1.5rem;">Flashcard Üret</button>
-        </form>
+<div class="hero-panel hero-panel--composer">
+    <header class="hero-header">
+      <div>
+        <div class="hero-badge">
+          <span class="material-symbols-outlined">local_library</span>
+          <span>ALEXANDRIA // INPUT</span>
+        </div>
+        <h1>STUDY_MODULE</h1>
+        <p>Metni yapistir veya dosyayi birak; sistem notu alip tek hamlede calisilmaya hazir flashcard setine donustursun.</p>
       </div>
+    </header>
 
-      <!-- Summary Section -->
-      {% if summary %}
-        <section class="summary-section">
-          <h3>Özet</h3>
-          <p>{{ summary }}</p>
-        </section>
-      {% endif %}
+    <form class="hero-form hero-composer" method="post" enctype="multipart/form-data" data-has-input="{% if input_text %}true{% else %}false{% endif %}">
+      <input id="note_file" class="hero-file-input" type="file" name="note_file" accept=".txt,.pdf,.docx" />
 
-      <!-- Keywords Section -->
-      {% if keywords %}
-        <section class="keywords-section">
-          <h3>Anahtar Kavramlar</h3>
-          <div class="tag-list">
-            {% for item in keywords %}
-              <span class="tag">{{ item }}</span>
-            {% endfor %}
-          </div>
-        </section>
-      {% endif %}
-    </div>
+      <section id="hero-dropzone" class="hero-dropzone" tabindex="0" aria-label="Metin yapistir veya dosya birak">
+        <span class="hero-dropzone__hint">CTRL+V</span>
+        <div class="hero-dropzone__icon">
+          <span class="material-symbols-outlined">upload_file</span>
+        </div>
+        <h2>UPLOAD OR PASTE TEXT</h2>
+        <button id="choose-file-btn" class="control-btn hero-dropzone__button" type="button">Drag files or press</button>
+        <p>Supported format: .txt .pdf .docx</p>
+      </section>
 
-    <!-- Flashcard Display Section -->
-    {% if flashcards %}
-      <div class="cards-section">
-        <div class="cards-header">
+      <section class="hero-ready">
+        <div class="hero-ready__header">
           <div>
-            <span class="label-text">Flashcard Kartları</span>
-            <h3>Çalışma Kartları</h3>
+            <h2>DATA_RECEIVED // READY_FOR_PROCESSING</h2>
           </div>
-          <span id="card-position" class="card-counter">1 / {{ flashcards|length }}</span>
-        </div>
-        
-        <div class="stack-wrapper">
-          <div class="stack-container" id="flashcard-stack">
-            {% for card in flashcards %}
-              <div class="stack-card" data-index="{{ loop.index0 }}">
-                <div class="card-content">
-                  <div style="text-align: center; margin-bottom: 1.5rem;">
-                    <p style="font-size: 1.1rem; color: var(--on-surface-variant); margin-bottom: 0.5rem; font-size: 0.875rem;">Soru</p>
-                    <p style="font-size: 1.5rem; font-weight: 700; line-height: 1.4;">{{ card.question }}</p>
-                  </div>
-                  <hr style="border: none; border-top: 1px solid var(--outline-variant); margin: 1.5rem 0;">
-                  <div style="text-align: center;">
-                    <p style="font-size: 1.1rem; color: var(--on-surface-variant); margin-bottom: 0.5rem; font-size: 0.875rem;">Cevap</p>
-                    <p style="font-size: 1.1rem; line-height: 1.6;">{{ card.answer }}</p>
-                  </div>
-                </div>
-                <form method="post" action="{{ url_for('main.save_card_route') }}" class="card-save-form">
-                  <input type="hidden" name="question" value="{{ card.question }}">
-                  <input type="hidden" name="answer" value="{{ card.answer }}">
-                  <input type="hidden" name="source" value="{{ card.source }}">
-                  <button type="submit" class="save-btn">💾 Kaydet</button>
-                </form>
-              </div>
-            {% endfor %}
+          <div class="hero-ready__stats">
+            <span class="hero-ready__check material-symbols-outlined">check_circle</span>
+            <div id="hero-word-badge" class="hero-word-badge">0 WORDS</div>
           </div>
         </div>
 
-        <!-- Controls -->
-        <div class="cards-controls">
-          <button type="button" id="prev-card" class="control-btn">← Önceki</button>
-          <button type="button" id="next-card" class="control-btn">Sonraki →</button>
+        <div class="hero-preview">
+          <div class="hero-preview__toolbar">
+            <button type="submit" name="action" value="clear" class="ghost-btn hero-clear-btn">Geri</button>
+            <div id="hero-file-pill" class="hero-file-pill" hidden></div>
+          </div>
+          <label class="hero-sr-only" for="note_text">Upload or paste text</label>
+          <textarea id="note_text" class="hero-preview__text" name="note_text" placeholder="Ders notunu buraya yapistir...">{{ input_text }}</textarea>
         </div>
-      </div>
-    {% endif %}
 
-    <!-- Q&A Section -->
-    {% if qas %}
-      <section class="qas-section">
-        <h3>Soru-Cevap Önerileri</h3>
-        <div class="qa-grid">
-          {% for item in qas %}
-            <div class="qa-item">
-              <div class="qa-question">
-                <strong>S:</strong> {{ item.question }}
-              </div>
-              <div class="qa-answer">
-                <strong>C:</strong> {{ item.answer }}
-              </div>
-            </div>
-          {% endfor %}
+        <div class="hero-actions">
+          <fieldset class="hero-count-picker">
+            <legend>Kac kart?</legend>
+            <input id="count-5" type="radio" name="card_count" value="5" {% if selected_count == 5 %}checked{% endif %} />
+            <label for="count-5">5</label>
+            <input id="count-10" type="radio" name="card_count" value="10" {% if selected_count == 10 %}checked{% endif %} />
+            <label for="count-10">10</label>
+            <input id="count-20" type="radio" name="card_count" value="20" {% if selected_count == 20 %}checked{% endif %} />
+            <label for="count-20">20</label>
+          </fieldset>
+
+          <button type="submit" class="cta-btn hero-generate-btn">Generate Flashcards</button>
         </div>
       </section>
-    {% endif %}
-  </div>
+    </form>
+</div>
 
-  <script src="{{ url_for('static', filename='js/stack.js') }}"></script>
+<section class="hero-history-panel">
+  <div class="hero-history-panel__header">
+    <div class="hero-badge">
+      <span class="material-symbols-outlined">history</span>
+      <span>ALEXANDRIA // ARCHIVE</span>
+    </div>
+    <p>Olusturulan setler sondan basa burada gorunur.</p>
+  </div>
+  <div id="hero-history-gallery" class="hero-history-gallery"></div>
+</section>
+
+<footer class="hero-footer">
+  <p>Paste fast. Study faster.</p>
+  <span>Focus Mode Active</span>
+</footer>
 {% endblock %}

@@ -1,40 +1,19 @@
 <!doctype html>
 <html lang="tr">
   <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Flashcard & NLP Sistemi</title>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Work+Sans:wght@300;400;500;600&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>ALEXANDRIA // Flashcard Sistemi</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" crossorigin href="https://fonts.gstatic.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Space+Grotesk:wght@400;700&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}" />
   </head>
-  <body>
-    <!-- Sidebar Navigation -->
-    <aside class="sidebar">
-      <div class="sidebar-header">
-        <h2 class="sidebar-title">Flashcard Sistemi</h2>
-        <p class="sidebar-subtitle">NLP Tabanlı Üretim</p>
-      </div>
-      <nav class="sidebar-nav">
-        <a href="{{ url_for('main.index') }}" class="nav-item active">
-          <span class="nav-icon">home</span>
-          <span>Ana Sayfa</span>
-        </a>
-        <a href="{{ url_for('main.cards') }}" class="nav-item">
-          <span class="nav-icon">collections</span>
-          <span>Kaydedilen Kartlar</span>
-        </a>
-      </nav>
-      <div class="sidebar-footer">
-        <button class="btn-focus" onclick="document.querySelector('main').scrollIntoView({behavior: 'smooth'})">
-          <span class="nav-icon">play_arrow</span>
-          Başla
-        </button>
-      </div>
-    </aside>
-
-    <!-- Main Content -->
-    <main class="main-content">
-      {% with messages = get_flashed_messages(with_categories=true) %}
+  <body class="page-shell">
+    <div class="loading-bar" aria-hidden="true">
+      <div class="loading-bar__fill"></div>
+    </div>
+    {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
         <div class="flash-area">
           {% for category, message in messages %}
@@ -42,19 +21,9 @@
           {% endfor %}
         </div>
       {% endif %}
-      {% endwith %}
-      {% block content %}{% endblock %}
-    </main>
-
-    <!-- Floating Action Buttons -->
-    <div class="fab-group">
-      <button class="fab fab-secondary" title="Ayarlar">
-        <span class="nav-icon">settings</span>
-      </button>
-      <button class="fab fab-primary" title="Yardım">
-        <span class="nav-icon" style="font-variation-settings: 'FILL' 1;">lightbulb</span>
-      </button>
-    </div>
+    {% endwith %}
+    {% block content %}{% endblock %}
+    <script src="{{ url_for('static', filename='js/stack.js') }}"></script>
   </body>
 </html>
 

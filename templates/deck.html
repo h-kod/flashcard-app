@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div
+  class="deck-page"
+  data-deck-id="{{ generated_at }}"
+  data-deck-title="{{ topic_title }}"
+  data-generated-at="{{ generated_at }}"
+>
+  <div class="deck-header">
+    <div>
+      <div class="hero-badge">
+        <span class="material-symbols-outlined">psychology</span>
+        <span>ALEXANDRIA // FLASHCARD</span>
+      </div>
+      <h1>LEARNING_MODULE</h1>
+      <p>Konu icinde ilerle, onemli kartlari kaydet ve onceki setleri kaybetmeden calismaya devam et.</p>
+    </div>
+  </div>
+
+  <div class="deck-grid">
+    <section class="deck-stage">
+      <div class="stage-progress">
+        <div class="stage-progress-bar">
+          <div id="stage-progress-fill" class="stage-progress-fill"></div>
+          <strong id="card-position" class="stage-progress-count">1 / {{ flashcards|length }}</strong>
+        </div>
+        <div class="stage-progress-meta">
+          <div class="stage-progress-copy">
+            <span class="stage-progress-chip">KART AKISI</span>
+            <strong id="stage-topic-title" class="stage-topic-title">{{ topic_title }}</strong>
+          </div>
+        </div>
+      </div>
+
+      <div id="stage-card-container" class="stage-card-container">
+        <div id="deck-card-stack" class="deck-card-stack"></div>
+        <div id="saved-preview" class="saved-preview" hidden>
+          <div class="saved-preview__backdrop"></div>
+          <article class="saved-preview__card">
+            <button id="saved-preview-flip" class="saved-preview__flip" type="button">Cevir (Space)</button>
+            <button id="saved-preview-close" class="saved-preview__close" type="button">Kapat (Esc)</button>
+            <div id="saved-preview-panel" class="saved-preview__panel">
+              <div class="saved-preview__face saved-preview__face--front">
+                <span class="card-chip">ON</span>
+                <h2 id="saved-preview-question"></h2>
+                <p id="saved-preview-meta"></p>
+              </div>
+              <div class="saved-preview__face saved-preview__face--back">
+                <span class="card-chip">ARKA</span>
+                <h2 id="saved-preview-answer"></h2>
+                <p id="saved-preview-source" class="card-source"></p>
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <aside class="deck-panel">
+      <div class="panel-primary-actions">
+        <a href="{{ url_for('main.new_note') }}" class="cta-btn panel-cta">Yeni Flashcard (N)</a>
+      </div>
+
+      <section class="panel-saved">
+        <div class="panel-section-header">
+          <span class="panel-label">Kaydedilen Kart</span>
+          <strong id="saved-card-count">0</strong>
+        </div>
+        <div id="saved-card-list" class="saved-card-list"></div>
+      </section>
+
+      <div class="panel-note">
+        <p>Kaydedilen karta tiklayinca kart acilir. Kapatmak icin Kapat butonunu kullan, kartin ustune tiklayarak cevir.</p>
+      </div>
+
+      <section class="panel-history">
+        <div class="panel-section-header">
+          <span class="panel-label">Olusturulan Konular</span>
+          <strong id="deck-history-count">0</strong>
+        </div>
+        <div id="deck-history-list" class="deck-history-list"></div>
+      </section>
+    </aside>
+  </div>
+</div>
+
+<script id="deck-cards-json" type="application/json">{{ flashcards|tojson }}</script>
+{% endblock %}
