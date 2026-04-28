@@ -9,12 +9,12 @@
 >
   <div class="deck-header">
     <div>
-      <div class="hero-badge">
+      <a href="{{ url_for('main.index') }}" class="hero-badge" aria-label="Anasayfaya dön">
         <span class="material-symbols-outlined">psychology</span>
-        <span>ALEXANDRIA // FLASHCARD</span>
-      </div>
-      <h1>LEARNING_MODULE</h1>
-      <p>Konu icinde ilerle, onemli kartlari kaydet ve onceki setleri kaybetmeden calismaya devam et.</p>
+        <span>Hüseyin // KART</span>
+      </a>
+      <h1>Öğrenme Modülü</h1>
+      <p>Konu içinde ilerleyin, önemli kartları kaydedin ve önceki setleri koruyarak çalışmaya devam edin.</p>
     </div>
   </div>
 
@@ -38,11 +38,11 @@
         <div id="saved-preview" class="saved-preview" hidden>
           <div class="saved-preview__backdrop"></div>
           <article class="saved-preview__card">
-            <button id="saved-preview-flip" class="saved-preview__flip" type="button">Cevir (Space)</button>
-            <button id="saved-preview-close" class="saved-preview__close" type="button">Kapat (Esc)</button>
+            <button id="saved-preview-flip" class="saved-preview__flip" type="button">Çevir (Space)</button>
+            <button id="saved-preview-close" class="saved-preview__close" type="button">X (Esc)</button>
             <div id="saved-preview-panel" class="saved-preview__panel">
               <div class="saved-preview__face saved-preview__face--front">
-                <span class="card-chip">ON</span>
+                <span class="card-chip">ÖN</span>
                 <h2 id="saved-preview-question"></h2>
                 <p id="saved-preview-meta"></p>
               </div>
@@ -64,19 +64,19 @@
 
       <section class="panel-saved">
         <div class="panel-section-header">
-          <span class="panel-label">Kaydedilen Kart</span>
+          <span class="panel-label">Kaydedilen Kartlar</span>
           <strong id="saved-card-count">0</strong>
         </div>
         <div id="saved-card-list" class="saved-card-list"></div>
       </section>
 
       <div class="panel-note">
-        <p>Kaydedilen karta tiklayinca kart acilir. Kapatmak icin Kapat butonunu kullan, kartin ustune tiklayarak cevir.</p>
+        <p>Kaydedilen karta tiklayinca kart acilir. Kapatmak icin X butonunu kullan, kartin ustune tiklayarak çevir.</p>
       </div>
 
       <section class="panel-history">
         <div class="panel-section-header">
-          <span class="panel-label">Olusturulan Konular</span>
+          <span class="panel-label">Oluşturulan Konular</span>
           <strong id="deck-history-count">0</strong>
         </div>
         <div id="deck-history-list" class="deck-history-list"></div>

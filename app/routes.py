@@ -58,17 +58,17 @@ def index():
 
         text = clean_text(raw_text)
         if not text:
-            flash('Lutfen metin girin veya bir dosya yukleyin.', 'warning')
+            flash('Lütfen metin girin veya bir dosya yükleyin.', 'warning')
             return render_template('index.html', **context)
 
         if word_count(text) < 50:
-            flash('Flashcard olusturmak icin en az 50 kelimelik bir not girin.', 'warning')
+            flash('Kart oluşturmak için en az 50 kelimelik not girin.', 'warning')
             return render_template('index.html', **context)
 
         api_key = current_app.config.get('GEMINI_API_KEY')
         if not api_key:
             flash(
-                'Gemini API anahtariniz bulunamadi. Lutfen gemini_key.txt dosyasini olusturun veya GEMINI_API_KEY ortam degiskenini ayarlayin.',
+                'Gemini API anahtarınız bulunamadı. Lütfen gemini_key.txt dosyasını oluşturun veya GEMINI_API_KEY ortam değişkenini ayarlayın.',
                 'danger',
             )
             return render_template('index.html', **context)
@@ -83,7 +83,7 @@ def index():
             )
         except GeminiQuotaExceededError:
             flash(
-                'Gemini kota limitiniz dolu gorunuyor. Lutfen biraz sonra tekrar deneyin veya AI Studio ya da plan ayarlarinizdan kotanizi kontrol edin.',
+                'Gemini kota limitiniz dolu görünüyor. Lütfen biraz sonra tekrar deneyin veya plan ayarlarınızı kontrol edin.',
                 'danger',
             )
             return render_template('index.html', **context)
@@ -116,7 +116,7 @@ def deck():
     flashcards = session.get('flashcards', [])
     requested_history = request.args.get('history', '').strip()
     if not flashcards and not requested_history:
-        flash('Henuz kart yok. Lutfen bir not girin.', 'warning')
+        flash('Henüz kart yok. Lütfen bir not girin.', 'warning')
         return redirect(url_for('main.index'))
 
     generated_at = session.get('deck_generated_at', '')

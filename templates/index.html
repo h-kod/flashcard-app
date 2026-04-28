@@ -6,34 +6,41 @@
       <div>
         <div class="hero-badge">
           <span class="material-symbols-outlined">local_library</span>
-          <span>ALEXANDRIA // INPUT</span>
+          <span>Hüseyin // GİRİŞ</span>
         </div>
-        <h1>STUDY_MODULE</h1>
-        <p>Metni yapistir veya dosyayi birak; sistem notu alip tek hamlede calisilmaya hazir flashcard setine donustursun.</p>
+        <h1>Flashcard Modülü</h1>
+        <p>Metni yapıştırın veya dosya yükleyin; sistem notu kartlara dönüştürsün.</p>
       </div>
     </header>
 
     <form class="hero-form hero-composer" method="post" enctype="multipart/form-data" data-has-input="{% if input_text %}true{% else %}false{% endif %}">
       <input id="note_file" class="hero-file-input" type="file" name="note_file" accept=".txt,.pdf,.docx" />
 
-      <section id="hero-dropzone" class="hero-dropzone" tabindex="0" aria-label="Metin yapistir veya dosya birak">
+      <section id="hero-dropzone" class="hero-dropzone" tabindex="0" aria-label="Metin yapıştır veya dosya bırak">
+        <h2>Doğrudan Metin Yapıştır veya Dosya Yükle</h2>
         <span class="hero-dropzone__hint">CTRL+V</span>
         <div class="hero-dropzone__icon">
           <span class="material-symbols-outlined">upload_file</span>
         </div>
-        <h2>UPLOAD OR PASTE TEXT</h2>
-        <button id="choose-file-btn" class="control-btn hero-dropzone__button" type="button">Drag files or press</button>
-        <p>Supported format: .txt .pdf .docx</p>
+        <button id="choose-file-btn" class="control-btn hero-dropzone__button" type="button" aria-label="Dosya sürükle veya seç">
+          <span class="hero-dropzone__button-icon" aria-hidden="true">+</span>
+          <span class="hero-dropzone__button-text">Dosya Seç</span>
+        </button>
+        <div class="hero-dropzone__filetypes" aria-hidden="true">
+          <span class="file-type-pill">.txt</span>
+          <span class="file-type-pill">.pdf</span>
+          <span class="file-type-pill">.docx</span>
+        </div>
       </section>
 
       <section class="hero-ready">
         <div class="hero-ready__header">
           <div>
-            <h2>DATA_RECEIVED // READY_FOR_PROCESSING</h2>
+            <h2>VERİ ALINDI — İŞLEME HAZIR</h2>
           </div>
           <div class="hero-ready__stats">
             <span class="hero-ready__check material-symbols-outlined">check_circle</span>
-            <div id="hero-word-badge" class="hero-word-badge">0 WORDS</div>
+            <div id="hero-word-badge" class="hero-word-badge">0 KELİME</div>
           </div>
         </div>
 
@@ -42,13 +49,13 @@
             <button type="submit" name="action" value="clear" class="ghost-btn hero-clear-btn">Geri</button>
             <div id="hero-file-pill" class="hero-file-pill" hidden></div>
           </div>
-          <label class="hero-sr-only" for="note_text">Upload or paste text</label>
-          <textarea id="note_text" class="hero-preview__text" name="note_text" placeholder="Ders notunu buraya yapistir...">{{ input_text }}</textarea>
+          <label class="hero-sr-only" for="note_text">Metin yapıştır veya dosya bırak</label>
+          <textarea id="note_text" class="hero-preview__text" name="note_text" placeholder="Ders notunu buraya yapıştırın...">{{ input_text }}</textarea>
         </div>
 
         <div class="hero-actions">
           <fieldset class="hero-count-picker">
-            <legend>Kac kart?</legend>
+            <legend>Kaç kart?</legend>
             <input id="count-5" type="radio" name="card_count" value="5" {% if selected_count == 5 %}checked{% endif %} />
             <label for="count-5">5</label>
             <input id="count-10" type="radio" name="card_count" value="10" {% if selected_count == 10 %}checked{% endif %} />
@@ -57,7 +64,7 @@
             <label for="count-20">20</label>
           </fieldset>
 
-          <button type="submit" class="cta-btn hero-generate-btn">Generate Flashcards</button>
+          <button type="submit" class="cta-btn hero-generate-btn">Kartları Oluştur</button>
         </div>
       </section>
     </form>
@@ -66,16 +73,16 @@
 <section class="hero-history-panel">
   <div class="hero-history-panel__header">
     <div class="hero-badge">
-      <span class="material-symbols-outlined">history</span>
-      <span>ALEXANDRIA // ARCHIVE</span>
-    </div>
-    <p>Olusturulan setler sondan basa burada gorunur.</p>
+        <span class="material-symbols-outlined">history</span>
+        <span>Hüseyin // ARŞİV</span>
+      </div>
+      <p>Oluşturulan setler burada, yeniden en üstte görünür.</p>
   </div>
   <div id="hero-history-gallery" class="hero-history-gallery"></div>
 </section>
 
 <footer class="hero-footer">
-  <p>Paste fast. Study faster.</p>
-  <span>Focus Mode Active</span>
+  <p>Hızlı yapıştır — Daha hızlı öğrenin.</p>
+  <span>Odak Modu Aktif</span>
 </footer>
 {% endblock %}

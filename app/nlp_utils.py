@@ -64,7 +64,8 @@ def normalize_word(word: str) -> str:
 
 
 def extract_words(text: str) -> List[str]:
-    words = re.findall(r"[A-Za-z0-9']+", text, flags=re.UNICODE)
+    # Keep apostrophes inside words and support Unicode letters (e.g. Turkish characters).
+    words = re.findall(r"[^\W_]+(?:'[^\W_]+)?", text.lower(), flags=re.UNICODE)
     results = []
     for word in words:
         normalized = normalize_word(word)

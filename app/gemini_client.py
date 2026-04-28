@@ -48,18 +48,18 @@ def clean_text(text: str) -> str:
 
 def build_flashcard_prompt(text: str, max_cards: int) -> str:
     return (
-        'Asagidaki Turkce ders notundan ogretici ve anlamli calisma kartlari uret. '
-        f'Tam olarak {max_cards} adet flashcard olustur. '
-        'Her kartta "question", "answer" ve "source" alanlari olsun. '
-        'Tum soru ve cevaplari yalnizca verilen metne dayanarak yaz. Uydurma bilgi ekleme. '
-        'Anlamsiz, asiri genel, bos veya tekrar eden kartlar uretme. '
-        'Kartlar birlikte konunun temel kavramlarini, tanimlarini, farklarini ve kritik noktalarini ogretsin. '
+        'Aşağıdaki Türkçe ders notundan öğretici ve anlamlı çalışma kartları oluştur. '
+        f'Tam olarak {max_cards} adet flashcard üret. '
+        'Her kartta "question", "answer" ve "source" alanları olsun. '
+        'Tüm soru ve cevaplar yalnızca verilen metne dayanmalı; uydurma bilgi eklenmemeli. '
+        'Anlamsız, aşırı genel, boş veya tekrar eden kartlar üretmeyin. '
+        'Kartlar konunun temel kavramlarını, tanımlarını, farklarını ve kritik noktalarını öğretmeli. '
         f'Soru en fazla {MAX_QUESTION_CHARS} karakter olsun. '
         f'Cevap en fazla {MAX_ANSWER_CHARS} karakter olsun. '
         f'Source en fazla {MAX_SOURCE_CHARS} karakter olsun. '
-        'Yazi kart ekranina sigacak kadar kisa ve net olsun. '
+        'Yazı kart ekranına sığacak kadar kısa ve net olsun. '
         'Her cevap tek paragraf olsun. '
-        'Ciktida yalnizca gecerli JSON ver, aciklama veya markdown ekleme.\n'
+        'Çıktıda yalnızca geçerli JSON verin; açıklama veya markdown eklemeyin.\n'
         '{"flashcards":[{"question":"...","answer":"...","source":"..."}]}\n---\n'
         f'{text}'
     )
@@ -67,18 +67,18 @@ def build_flashcard_prompt(text: str, max_cards: int) -> str:
 
 def build_repair_prompt(text: str, max_cards: int, previous_output: str) -> str:
     return (
-        'Onceki flashcard cikti kurallara tam uymadi. Yeni bir cikti olustur. '
-        f'Tam olarak {max_cards} adet flashcard ver. '
-        'Yalnizca verilen metne dayan. Uydurma veya anlamsiz kart uretme. '
-        'Tekrarlanan kartlardan kacin. '
+        'Önceki flashcard çıktısı kurallara tam uymadı. Yeni bir çıktı oluşturun. '
+        f'Tam olarak {max_cards} adet flashcard verin. '
+        'Yalnızca verilen metne dayanılmalı; uydurma veya anlamsız kartlar üretilmemeli. '
+        'Tekrarlanan kartlardan kaçının. '
         f'Her question en fazla {MAX_QUESTION_CHARS} karakter, '
         f'her answer en fazla {MAX_ANSWER_CHARS} karakter, '
         f'her source en fazla {MAX_SOURCE_CHARS} karakter olsun. '
-        'Cevaplar ogretici ama kisa olsun ve karta sigsin. '
-        'Yalnizca gecerli JSON dondur.\n'
+        'Cevaplar öğretici ama kısa olsun ve karta sığsın. '
+        'Yalnızca geçerli JSON döndürün.\n'
         'Metin:\n'
         f'{text}\n'
-        'Gecersiz veya yetersiz onceki cikti:\n'
+        'Geçersiz veya yetersiz önceki çıktı:\n'
         f'{previous_output}'
     )
 
@@ -283,6 +283,6 @@ def generate_flashcards_with_gemini(
         )
 
     raise GeminiGenerationError(
-        'Gemini gecerli ve yeterli sayida flashcard uretemedi. '
-        'Lutfen daha acik veya daha zengin bir not ile tekrar deneyin.'
+        'Gemini geçerli ve yeterli sayıda flashcard üretemedi. '
+        'Lütfen daha açık veya daha zengin bir notla tekrar deneyin.'
     )

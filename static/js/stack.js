@@ -37,6 +37,12 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }
 
+  function stopLoading() {
+    if (pageBody) {
+      pageBody.classList.remove('is-loading');
+    }
+  }
+
   function safeParseStorage(key) {
     try {
       return JSON.parse(localStorage.getItem(key) || '[]');
@@ -72,6 +78,11 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
+  window.addEventListener('pageshow', function () {
+    // Clear any loading state restored from the back/forward cache.
+    stopLoading();
+  });
+
   function updateHeroComposerState() {
     if (!heroForm || !heroTextInput) {
       return;
@@ -86,11 +97,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (heroWordBadge) {
       if (hasText) {
-        heroWordBadge.textContent = `${words.toLocaleString('tr-TR')} WORDS`;
+        heroWordBadge.textContent = `${words.toLocaleString('tr-TR')} KELİME`;
       } else if (hasFile) {
-        heroWordBadge.textContent = 'FILE READY';
+        heroWordBadge.textContent = 'DOSYA HAZIR';
       } else {
-        heroWordBadge.textContent = '0 WORDS';
+        heroWordBadge.textContent = '0 KELİME';
       }
     }
 
@@ -123,7 +134,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (!history.length) {
       const emptyState = document.createElement('div');
       emptyState.className = 'hero-history-empty';
-      emptyState.textContent = 'Henuz olusturulmus bir set yok. Ilk flashcard galerin burada gorunecek.';
+      emptyState.textContent = 'Henüz set oluşturulmadı. Oluşturulan setler burada görünür.';
       heroHistoryGallery.appendChild(emptyState);
       return;
     }
@@ -251,6 +262,31 @@ document.addEventListener('DOMContentLoaded', function () {
 
   updateHeroComposerState();
   renderHeroHistoryGallery();
+
+  // Apply simple random animations to the file-type pills inside the dropzone
+  function applyRandomAnimationsToFilePills() {
+    const pills = Array.from(document.querySelectorAll('.hero-dropzone .file-type-pill'));
+    if (!pills.length) return;
+    const animClasses = ['anim-bounce', 'anim-rotate', 'anim-pulse', 'anim-sway'];
+
+    function assign() {
+      pills.forEach(function (pill) {
+        // remove previous anim classes
+        pill.classList.remove(...animClasses);
+        const cls = animClasses[Math.floor(Math.random() * animClasses.length)];
+        pill.classList.add(cls);
+        // randomize duration and small delay for variety
+        pill.style.animationDuration = (Math.random() * 1.2 + 0.6).toFixed(2) + 's';
+        pill.style.animationDelay = (Math.random() * 0.9).toFixed(2) + 's';
+      });
+    }
+
+    assign();
+    // reassign every 5s for light random effect
+    setInterval(assign, 5000);
+  }
+
+  applyRandomAnimationsToFilePills();
 
   if (!deckPage || !cardsJson || !cardContainer || !cardStack) {
     return;
@@ -447,7 +483,7 @@ document.addEventListener('DOMContentLoaded', function () {
         saveButton.textContent = 'Kaydedildi';
         saveButton.classList.add('is-saved');
       } else {
-        saveButton.textContent = 'Kaydet';
+        saveButton.textContent = 'Kaydet (K)';
         saveButton.classList.remove('is-saved');
       }
     });
@@ -488,7 +524,6 @@ document.addEventListener('DOMContentLoaded', function () {
         meta.textContent = `${card.deckTitle} • ${card.cardIndex + 1}. kart`;
 
         button.appendChild(title);
-        button.appendChild(meta);
         button.addEventListener('click', function () {
           openSavedPreview(card);
         });
@@ -527,7 +562,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (!history.length) {
       const emptyState = document.createElement('p');
       emptyState.className = 'panel-empty';
-      emptyState.textContent = 'Olusturdugun konu setleri burada listelenecek.';
+      emptyState.textContent = 'Oluşturduğun konu setleri burada listelenecek.';
       deckHistoryList.appendChild(emptyState);
       return;
     }
@@ -648,8 +683,8 @@ document.addEventListener('DOMContentLoaded', function () {
         <button class="card-nav card-nav--prev" type="button" aria-label="Onceki kart">&#8592;</button>
         <button class="card-nav card-nav--next" type="button" aria-label="Sonraki kart">&#8594;</button>
         <div class="card-quick-actions">
-          <button class="mini-action flip-card-btn" type="button">Cevir (Space)</button>
-          <button class="mini-action save-card-btn" type="button">Kaydet (S)</button>
+          <button class="mini-action flip-card-btn" type="button">Çevir (Space)</button>
+          <button class="mini-action save-card-btn" type="button">Kaydet (K)</button>
         </div>
         <div class="card-panel">
           <div class="card-face card-front">
@@ -777,7 +812,7 @@ document.addEventListener('DOMContentLoaded', function () {
       return;
     }
 
-    if (event.code === 'KeyS' && !isPreviewOpen()) {
+    if (event.code === 'KeyK' && !isPreviewOpen()) {
       event.preventDefault();
       const activeCard = currentDeck.cards[currentDeck.activeIndex];
       if (activeCard) {
@@ -785,6 +820,23 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     }
   });
+
+  if (cardStack) {
+    cardStack.addEventListener(
+      'wheel',
+      function (e) {
+        if (isPreviewOpen()) return;
+        if (Math.abs(e.deltaY) < 2) return;
+        e.preventDefault();
+        if (e.deltaY > 0) {
+          goNext();
+        } else {
+          goPrevious();
+        }
+      },
+      { passive: false }
+    );
+  }
 
   const existingDecks = getDeckHistory();
   const requestedDeckId = new URLSearchParams(window.location.search).get('history');
