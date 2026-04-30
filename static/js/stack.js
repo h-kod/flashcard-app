@@ -29,13 +29,44 @@
   const deleteConfirmDescription = document.getElementById('delete-confirm-description');
   const deleteConfirmCancel = document.getElementById('delete-confirm-cancel');
   const deleteConfirmAccept = document.getElementById('delete-confirm-accept');
-  const heroGenerateButton = document.querySelector('.hero-generate-btn');
   const cardsJson = document.getElementById('deck-cards-json');
 
   const SAVED_CARDS_KEY = 'alexandria_saved_cards_v2';
   const DECK_HISTORY_KEY = 'alexandria_deck_history_v2';
   const HIDDEN_DECK_HISTORY_KEY = 'alexandria_hidden_deck_history_v1';
   let isLoadingLocked = false;
+  let pendingDeleteAction = null;
+  let savedCardsCache = null;
+  let deckHistoryCache = null;
+  let hiddenDeckIdsCache = null;
+
+  const heroFormControls = heroForm
+    ? Array.from(heroForm.querySelectorAll('button, input, textarea, select')).filter(function (element) {
+        return element && element.type !== 'hidden';
+      })
+    : [];
+
+  function setControlsDisabled(elements, disabled) {
+    elements.forEach(function (element) {
+      element.disabled = disabled;
+    });
+  }
+
+  function isTypingTarget(target) {
+    return Boolean(
+      target &&
+        (target.tagName === 'INPUT' ||
+          target.tagName === 'TEXTAREA' ||
+          target.tagName === 'SELECT' ||
+          target.isContentEditable)
+    );
+  }
+
+  function sortByNewest(items, key) {
+    return items.slice().sort(function (left, right) {
+      return new Date(right[key] || 0) - new Date(left[key] || 0);
+    });
+  }
 
   function startLoading() {
     if (isLoadingLocked) {
@@ -47,13 +78,7 @@
       pageBody.classList.add('is-loading');
     }
 
-    if (heroForm) {
-      Array.from(heroForm.querySelectorAll('button, input, textarea, select')).forEach(function (element) {
-        if (element && element.type !== 'hidden') {
-          element.disabled = true;
-        }
-      });
-    }
+    setControlsDisabled(heroFormControls, true);
   }
 
   function stopLoading() {
@@ -62,13 +87,7 @@
       pageBody.classList.remove('is-loading');
     }
 
-    if (heroForm) {
-      Array.from(heroForm.querySelectorAll('button, input, textarea, select')).forEach(function (element) {
-        if (element && element.type !== 'hidden') {
-          element.disabled = false;
-        }
-      });
-    }
+    setControlsDisabled(heroFormControls, false);
   }
 
   function safeParseStorage(key) {
@@ -153,10 +172,7 @@
       return;
     }
 
-    const history = getDeckHistory()
-      .sort(function (left, right) {
-        return new Date(right.createdAt) - new Date(left.createdAt);
-      });
+    const history = sortByNewest(getDeckHistory(), 'createdAt');
 
     heroHistoryGallery.innerHTML = '';
 
@@ -277,8 +293,7 @@
       return;
     }
 
-    const target = event.target;
-    if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) {
+    if (isTypingTarget(event.target)) {
       return;
     }
 
@@ -317,8 +332,6 @@
 
   applyRandomAnimationsToFilePills();
 
-  let pendingDeleteAction = null;
-
   function initSavedCardsPage() {
     if (!savedCardsPage || !savedCardsGrid) {
       return;
@@ -346,47 +359,9 @@
         });
       }
     });
-
-    if (deleteConfirmCancel) {
-      deleteConfirmCancel.addEventListener('click', closeDeleteConfirm);
-    }
-
-    if (deleteConfirmModal) {
-      deleteConfirmModal.addEventListener('click', function (event) {
-        if (event.target && event.target.hasAttribute('data-delete-confirm-close')) {
-          closeDeleteConfirm();
-        }
-      });
-    }
-
-    if (deleteConfirmAccept) {
-      deleteConfirmAccept.addEventListener('click', function () {
-        const action = pendingDeleteAction;
-        closeDeleteConfirm();
-        if (typeof action === 'function') {
-          action();
-        }
-      });
-    }
-
-    document.addEventListener('keydown', function (event) {
-      const target = event.target;
-      const isTypingTarget =
-        target &&
-        (target.tagName === 'INPUT' ||
-          target.tagName === 'TEXTAREA' ||
-          target.tagName === 'SELECT' ||
-          target.isContentEditable);
-
-      if (isTypingTarget) {
-        return;
-      }
-
-      if (event.code === 'Escape' && deleteConfirmModal && !deleteConfirmModal.hidden) {
-        closeDeleteConfirm();
-      }
-    });
   }
+
+  initDeleteConfirmHandlers();
 
   if (!deckPage || !cardsJson || !cardContainer || !cardStack) {
     initSavedCardsPage();
@@ -405,17 +380,37 @@
     localStorage.setItem(key, JSON.stringify(value));
   }
 
+  function setSavedCards(cards) {
+    savedCardsCache = cards;
+    setStorage(SAVED_CARDS_KEY, cards);
+  }
+
+  function setHiddenDeckIds(hiddenDeckIds) {
+    hiddenDeckIdsCache = hiddenDeckIds;
+    setStorage(HIDDEN_DECK_HISTORY_KEY, hiddenDeckIds);
+  }
+
+  function setDeckHistory(history) {
+    deckHistoryCache = history;
+    setStorage(DECK_HISTORY_KEY, history);
+  }
+
   function getHiddenDeckIds() {
-    return safeParseStorage(HIDDEN_DECK_HISTORY_KEY).filter(function (value) {
+    if (hiddenDeckIdsCache) {
+      return hiddenDeckIdsCache;
+    }
+
+    hiddenDeckIdsCache = safeParseStorage(HIDDEN_DECK_HISTORY_KEY).filter(function (value) {
       return typeof value === 'string' && value.trim();
     });
+    return hiddenDeckIdsCache;
   }
 
   function hideDeckId(deckId) {
-    const hiddenDeckIds = getHiddenDeckIds();
+    const hiddenDeckIds = getHiddenDeckIds().slice();
     if (!hiddenDeckIds.includes(deckId)) {
       hiddenDeckIds.unshift(deckId);
-      setStorage(HIDDEN_DECK_HISTORY_KEY, hiddenDeckIds.slice(0, 100));
+      setHiddenDeckIds(hiddenDeckIds.slice(0, 100));
     }
   }
 
@@ -595,16 +590,25 @@
   }
 
   function getSavedCards() {
-    return safeParseStorage(SAVED_CARDS_KEY)
+    if (savedCardsCache) {
+      return savedCardsCache;
+    }
+
+    savedCardsCache = safeParseStorage(SAVED_CARDS_KEY)
       .map(function (card) {
         return normalizeCard(card, card && card.deckId, card && card.deckTitle, card && card.cardIndex);
       })
       .filter(Boolean);
+    return savedCardsCache;
   }
 
   function getDeckHistory() {
+    if (deckHistoryCache) {
+      return deckHistoryCache;
+    }
+
     const hiddenDeckIds = getHiddenDeckIds();
-    return safeParseStorage(DECK_HISTORY_KEY)
+    deckHistoryCache = safeParseStorage(DECK_HISTORY_KEY)
       .map(function (deck) {
         if (!deck || typeof deck !== 'object') {
           return null;
@@ -638,6 +642,7 @@
         };
       })
       .filter(Boolean);
+    return deckHistoryCache;
   }
 
   const initialCards = safeParseString(cardsJson.textContent || '[]', []);
@@ -659,7 +664,7 @@
       return;
     }
 
-    const history = getDeckHistory();
+    const history = getDeckHistory().slice();
     const payload = {
       id: deck.id,
       title: deck.title,
@@ -677,7 +682,7 @@
       history.unshift(payload);
     }
 
-    setStorage(DECK_HISTORY_KEY, history.slice(0, 30));
+    setDeckHistory(history.slice(0, 30));
   }
 
   function isCardSaved(cardData) {
@@ -761,6 +766,52 @@
     });
   }
 
+  function setEmptyState(container, message) {
+    container.innerHTML = '';
+    const emptyState = document.createElement('p');
+    emptyState.className = 'panel-empty';
+    emptyState.textContent = message;
+    container.appendChild(emptyState);
+  }
+
+  function createSidebarItem(config) {
+    const item = document.createElement('div');
+    item.className = config.itemClassName;
+    if (config.isActive) {
+      item.classList.add('is-active');
+    }
+
+    const openButton = document.createElement('button');
+    openButton.type = 'button';
+    openButton.className = config.openClassName;
+
+    const title = document.createElement(config.titleTagName || 'strong');
+    title.className = config.titleClassName || '';
+    title.textContent = config.title;
+
+    const meta = document.createElement('span');
+    meta.className = config.metaClassName;
+    meta.textContent = config.meta;
+
+    openButton.appendChild(title);
+    openButton.appendChild(meta);
+    openButton.addEventListener('click', config.onOpen);
+
+    const deleteButton = document.createElement('button');
+    deleteButton.type = 'button';
+    deleteButton.className = config.deleteClassName;
+    deleteButton.setAttribute('aria-label', config.deleteAriaLabel);
+    deleteButton.textContent = '×';
+    deleteButton.addEventListener('click', function (event) {
+      event.stopPropagation();
+      config.onDelete();
+    });
+
+    item.appendChild(openButton);
+    item.appendChild(deleteButton);
+    return item;
+  }
+
   function renderSavedCards() {
     if (!savedCardList || !savedCardCount) {
       return;
@@ -768,67 +819,39 @@
 
     const savedCards = getSavedCards();
     savedCardCount.textContent = String(savedCards.length);
-    savedCardList.innerHTML = '';
 
     if (!savedCards.length) {
-      const emptyState = document.createElement('p');
-      emptyState.className = 'panel-empty';
-      emptyState.textContent = 'Kaydettigin kartlar burada gorunecek.';
-      savedCardList.appendChild(emptyState);
+      setEmptyState(savedCardList, 'Kaydettigin kartlar burada gorunecek.');
       return;
     }
 
-    savedCards
-      .slice()
-      .sort(function (left, right) {
-        return new Date(right.savedAt || 0) - new Date(left.savedAt || 0);
-      })
-      .forEach(function (card) {
-        const item = document.createElement('div');
-        item.className = 'saved-card-item';
-        if (getSavedCardKey(card) === activeSavedCardKey) {
-          item.classList.add('is-active');
-        }
-
-        const openButton = document.createElement('button');
-        openButton.type = 'button';
-        openButton.className = 'saved-card-item__open';
-
-        const title = document.createElement('strong');
-        title.textContent = card.question;
-
-        const meta = document.createElement('span');
-        meta.className = 'saved-card-item__meta';
-        meta.textContent = `${card.deckTitle || 'Flashcard Seti'} • ${card.cardIndex + 1}. kart`;
-
-        openButton.appendChild(title);
-        openButton.appendChild(meta);
-
-        const deleteButton = document.createElement('button');
-        deleteButton.type = 'button';
-        deleteButton.className = 'saved-card-delete-btn';
-        deleteButton.setAttribute('aria-label', `${card.question} kartını sil`);
-        deleteButton.textContent = '×';
-
-        deleteButton.addEventListener('click', function (event) {
-          event.stopPropagation();
-          openDeleteConfirm({
-            title: 'Kaydedilen kart silinsin mi?',
-            description: card.question,
-            onConfirm: function () {
-              deleteSavedCard(card);
-            },
-          });
-        });
-
-        openButton.addEventListener('click', function () {
-          openSavedPreview(card);
-        });
-
-        item.appendChild(openButton);
-        item.appendChild(deleteButton);
-        savedCardList.appendChild(item);
-      });
+    savedCardList.innerHTML = '';
+    sortByNewest(savedCards, 'savedAt').forEach(function (card) {
+      savedCardList.appendChild(
+        createSidebarItem({
+          itemClassName: 'saved-card-item',
+          openClassName: 'saved-card-item__open',
+          title: card.question,
+          meta: `${card.deckTitle || 'Flashcard Seti'} • ${card.cardIndex + 1}. kart`,
+          metaClassName: 'saved-card-item__meta',
+          deleteClassName: 'saved-card-delete-btn',
+          deleteAriaLabel: `${card.question} kartını sil`,
+          isActive: getSavedCardKey(card) === activeSavedCardKey,
+          onOpen: function () {
+            openSavedPreview(card);
+          },
+          onDelete: function () {
+            openDeleteConfirm({
+              title: 'Kaydedilen kart silinsin mi?',
+              description: card.question,
+              onConfirm: function () {
+                deleteSavedCard(card);
+              },
+            });
+          },
+        })
+      );
+    });
   }
 
   function deleteSavedCard(cardData) {
@@ -837,7 +860,7 @@
       return getSavedCardKey(item) !== targetKey;
     });
 
-    setStorage(SAVED_CARDS_KEY, savedCards);
+    setSavedCards(savedCards);
     if (getSavedCardKey(cardData) === activeSavedCardKey) {
       closeSavedPreview();
     }
@@ -871,68 +894,41 @@
 
     const history = getDeckHistory();
     deckHistoryCount.textContent = String(history.length);
-    deckHistoryList.innerHTML = '';
 
     if (!history.length) {
-      const emptyState = document.createElement('p');
-      emptyState.className = 'panel-empty';
-      emptyState.textContent = 'Oluşturduğun konu setleri burada listelenecek.';
-      deckHistoryList.appendChild(emptyState);
+      setEmptyState(deckHistoryList, 'Oluşturduğun konu setleri burada listelenecek.');
       return;
     }
 
-    history
-      .slice()
-      .sort(function (left, right) {
-        return new Date(right.createdAt) - new Date(left.createdAt);
-      })
-      .forEach(function (deck) {
-        const item = document.createElement('div');
-        item.className = 'deck-history-item';
-        if (deck.id === currentDeck.id) {
-          item.classList.add('is-active');
-        }
-
-        const openButton = document.createElement('button');
-        openButton.type = 'button';
-        openButton.className = 'deck-history-item__open';
-
-        const title = document.createElement('span');
-        title.className = 'deck-history-item__title';
-        title.textContent = deck.title;
-
-        const meta = document.createElement('span');
-        meta.className = 'deck-history-item__meta';
-        meta.textContent = `${formatDateLabel(deck.createdAt)} • ${deck.cards.length} kart`;
-
-        openButton.appendChild(title);
-        openButton.appendChild(meta);
-
-        const deleteButton = document.createElement('button');
-        deleteButton.type = 'button';
-        deleteButton.className = 'deck-history-item__delete';
-        deleteButton.setAttribute('aria-label', `${deck.title} konusunu sil`);
-        deleteButton.textContent = '×';
-
-        deleteButton.addEventListener('click', function (event) {
-          event.stopPropagation();
-          openDeleteConfirm({
-            title: 'Oluşturulan konu silinsin mi?',
-            description: deck.title,
-            onConfirm: function () {
-              deleteDeckHistory(deck.id);
-            },
-          });
-        });
-
-        openButton.addEventListener('click', function () {
-          loadDeck(deck);
-        });
-
-        item.appendChild(openButton);
-        item.appendChild(deleteButton);
-        deckHistoryList.appendChild(item);
-      });
+    deckHistoryList.innerHTML = '';
+    sortByNewest(history, 'createdAt').forEach(function (deck) {
+      deckHistoryList.appendChild(
+        createSidebarItem({
+          itemClassName: 'deck-history-item',
+          openClassName: 'deck-history-item__open',
+          title: deck.title,
+          titleTagName: 'span',
+          titleClassName: 'deck-history-item__title',
+          meta: `${formatDateLabel(deck.createdAt)} • ${deck.cards.length} kart`,
+          metaClassName: 'deck-history-item__meta',
+          deleteClassName: 'deck-history-item__delete',
+          deleteAriaLabel: `${deck.title} konusunu sil`,
+          isActive: deck.id === currentDeck.id,
+          onOpen: function () {
+            loadDeck(deck);
+          },
+          onDelete: function () {
+            openDeleteConfirm({
+              title: 'Oluşturulan konu silinsin mi?',
+              description: deck.title,
+              onConfirm: function () {
+                deleteDeckHistory(deck.id);
+              },
+            });
+          },
+        })
+      );
+    });
   }
 
   function deleteDeckHistory(deckId) {
@@ -941,7 +937,7 @@
     });
 
     hideDeckId(deckId);
-    setStorage(DECK_HISTORY_KEY, filteredHistory);
+    setDeckHistory(filteredHistory);
 
     if (currentDeck.id === deckId) {
       currentDeck.activeIndex = Math.max(0, Math.min(currentDeck.activeIndex, currentDeck.cards.length - 1));
@@ -969,7 +965,7 @@
           savedAt: new Date().toISOString(),
         })
       );
-      setStorage(SAVED_CARDS_KEY, savedCards.slice(0, 100));
+      setSavedCards(savedCards.slice(0, 100));
     }
 
     const body = new URLSearchParams();
@@ -1087,6 +1083,32 @@
     previewClose.addEventListener('click', closeSavedPreview);
   }
 
+  function handleDeleteConfirmAccept() {
+    const action = pendingDeleteAction;
+    closeDeleteConfirm();
+    if (typeof action === 'function') {
+      action();
+    }
+  }
+
+  function initDeleteConfirmHandlers() {
+    if (deleteConfirmCancel) {
+      deleteConfirmCancel.addEventListener('click', closeDeleteConfirm);
+    }
+
+    if (deleteConfirmModal) {
+      deleteConfirmModal.addEventListener('click', function (event) {
+        if (event.target && event.target.hasAttribute('data-delete-confirm-close')) {
+          closeDeleteConfirm();
+        }
+      });
+    }
+
+    if (deleteConfirmAccept) {
+      deleteConfirmAccept.addEventListener('click', handleDeleteConfirmAccept);
+    }
+  }
+
   if (previewFlip) {
     previewFlip.addEventListener('click', function (event) {
       event.stopPropagation();
@@ -1106,38 +1128,8 @@
     });
   }
 
-  if (deleteConfirmCancel) {
-    deleteConfirmCancel.addEventListener('click', closeDeleteConfirm);
-  }
-
-  if (deleteConfirmModal) {
-    deleteConfirmModal.addEventListener('click', function (event) {
-      if (event.target && event.target.hasAttribute('data-delete-confirm-close')) {
-        closeDeleteConfirm();
-      }
-    });
-  }
-
-  if (deleteConfirmAccept) {
-    deleteConfirmAccept.addEventListener('click', function () {
-      const action = pendingDeleteAction;
-      closeDeleteConfirm();
-      if (typeof action === 'function') {
-        action();
-      }
-    });
-  }
-
   document.addEventListener('keydown', function (event) {
-    const target = event.target;
-    const isTypingTarget =
-      target &&
-      (target.tagName === 'INPUT' ||
-        target.tagName === 'TEXTAREA' ||
-        target.tagName === 'SELECT' ||
-        target.isContentEditable);
-
-    if (isTypingTarget) {
+    if (isTypingTarget(event.target)) {
       return;
     }
 
