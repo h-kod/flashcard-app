@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="650" viewBox="0 0 1400 650">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#334155"/>
+    </marker>
+    <marker id="arrow-soft" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#64748b"/>
+    </marker>
+    <style>
+      .bg { fill: #f8fafc; }
+      .title { font: 700 30px Arial, sans-serif; fill: #0f172a; }
+      .subtitle { font: 400 14px Arial, sans-serif; fill: #475569; }
+      .box { fill: #ffffff; stroke: #334155; stroke-width: 2; rx: 16; ry: 16; }
+      .box-soft { fill: #eff6ff; stroke: #3b82f6; stroke-width: 2; rx: 16; ry: 16; }
+      .box-warm { fill: #fff7ed; stroke: #f97316; stroke-width: 2; rx: 16; ry: 16; }
+      .box-green { fill: #ecfdf5; stroke: #10b981; stroke-width: 2; rx: 16; ry: 16; }
+      .box-violet { fill: #f5f3ff; stroke: #8b5cf6; stroke-width: 2; rx: 16; ry: 16; }
+      .text { font: 400 15px Arial, sans-serif; fill: #0f172a; }
+      .text-small { font: 400 13px Arial, sans-serif; fill: #334155; }
+      .text-bold { font: 700 16px Arial, sans-serif; fill: #0f172a; }
+      .label { font: 700 13px Arial, sans-serif; fill: #475569; }
+      .line { stroke: #334155; stroke-width: 2.2; fill: none; marker-end: url(#arrow); }
+      .line-soft { stroke: #64748b; stroke-width: 1.8; fill: none; marker-end: url(#arrow-soft); stroke-dasharray: 5 4; }
+      .lifeline { stroke: #94a3b8; stroke-width: 1.8; stroke-dasharray: 8 6; }
+    </style>
+  </defs>
+  <rect class="bg" x="0" y="0" width="1400" height="650"/>
+  <text class="title" x="40" y="48">Use Case Diagram</text>
+  <rect class="box-warm" x="70" y="200" width="200" height="90" rx="16" ry="16"/><text class="text-bold" x="170.0" y="228" text-anchor="middle">Aktör</text><text class="text-small" x="170.0" y="252" text-anchor="middle">Öğrenci</text><rect class="box" x="1130" y="200" width="200" height="90" rx="16" ry="16"/><text class="text-bold" x="1230.0" y="228" text-anchor="middle">Sistem</text><text class="text-small" x="1230.0" y="252" text-anchor="middle">Flashcard Uygulaması</text><rect class="box-soft" x="330" y="90" width="320" height="100" rx="16" ry="16"/><text class="text-bold" x="490.0" y="118" text-anchor="middle">Kullanım Senaryoları</text><text class="text-small" x="490.0" y="142" text-anchor="middle">Metin gir</text><text class="text-small" x="490.0" y="161" text-anchor="middle">Dosya yükle</text><rect class="box-soft" x="330" y="220" width="320" height="100" rx="16" ry="16"/><text class="text-bold" x="490.0" y="248" text-anchor="middle">Kullanım Senaryoları</text><text class="text-small" x="490.0" y="272" text-anchor="middle">Flashcard üret</text><text class="text-small" x="490.0" y="291" text-anchor="middle">Deck görüntüle</text><rect class="box-soft" x="330" y="350" width="320" height="100" rx="16" ry="16"/><text class="text-bold" x="490.0" y="378" text-anchor="middle">Kullanım Senaryoları</text><text class="text-small" x="490.0" y="402" text-anchor="middle">Kart kaydet</text><text class="text-small" x="490.0" y="421" text-anchor="middle">Kart düzenle / sil</text><rect class="box-green" x="760" y="155" width="280" height="190" rx="16" ry="16"/><text class="text-bold" x="900.0" y="183" text-anchor="middle">Ek İşlevler</text><text class="text-small" x="900.0" y="207" text-anchor="middle">Kart dışa aktar (CSV/JSON)</text><text class="text-small" x="900.0" y="226" text-anchor="middle">Geçmiş deck göster</text><path class="line" d="M 270 245 L 330 140"/><text class="label" x="300.0" y="186.5" text-anchor="middle">girdi</text><path class="line" d="M 270 245 L 330 270"/><text class="label" x="300.0" y="251.5" text-anchor="middle">işleme</text><path class="line" d="M 270 245 L 330 400"/><text class="label" x="300.0" y="316.5" text-anchor="middle">yönetim</text><path class="line" d="M 650 140 L 760 240"/><text class="label" x="705.0" y="184.0" text-anchor="middle">tüm işlemler</text><path class="line-soft" d="M 650 270 L 760 240"/><text class="label" x="705.0" y="249.0" text-anchor="middle">sonuç gösterimi</text><path class="line-soft" d="M 650 400 L 760 240"/><text class="label" x="705.0" y="314.0" text-anchor="middle">kalıcı kayıt</text><text class="text" x="700" y="585" text-anchor="middle" style="font-size:15px; fill:#0f172a;"><tspan x="700" dy="0">Kapsam özeti: uygulama metin yükleme, otomatik kart üretimi, kart yönetimi</tspan><tspan x="700" dy="20">ve dışa aktarma işlevlerini destekler.</tspan></text>
+</svg>

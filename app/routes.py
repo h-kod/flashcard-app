@@ -68,7 +68,7 @@ def index():
         api_key = current_app.config.get('GEMINI_API_KEY')
         if not api_key:
             flash(
-                'Gemini API anahtarınız bulunamadı. Lütfen gemini_key.txt dosyasını oluşturun veya GEMINI_API_KEY ortam değişkenini ayarlayın.',
+                'Gemini API anahtarınız bulunamadı. Lütfen proje kök dizininde .env dosyası oluşturup GEMINI_API_KEY tanımlayın veya ortam değişkeni olarak ayarlayın.',
                 'danger',
             )
             return render_template('index.html', **context)

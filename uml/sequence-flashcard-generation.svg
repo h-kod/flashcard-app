@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="1030" viewBox="0 0 1400 1030">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#334155"/>
+    </marker>
+    <marker id="arrow-soft" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#64748b"/>
+    </marker>
+    <style>
+      .bg { fill: #f8fafc; }
+      .title { font: 700 30px Arial, sans-serif; fill: #0f172a; }
+      .subtitle { font: 400 14px Arial, sans-serif; fill: #475569; }
+      .box { fill: #ffffff; stroke: #334155; stroke-width: 2; rx: 16; ry: 16; }
+      .box-soft { fill: #eff6ff; stroke: #3b82f6; stroke-width: 2; rx: 16; ry: 16; }
+      .box-warm { fill: #fff7ed; stroke: #f97316; stroke-width: 2; rx: 16; ry: 16; }
+      .box-green { fill: #ecfdf5; stroke: #10b981; stroke-width: 2; rx: 16; ry: 16; }
+      .box-violet { fill: #f5f3ff; stroke: #8b5cf6; stroke-width: 2; rx: 16; ry: 16; }
+      .text { font: 400 15px Arial, sans-serif; fill: #0f172a; }
+      .text-small { font: 400 13px Arial, sans-serif; fill: #334155; }
+      .text-bold { font: 700 16px Arial, sans-serif; fill: #0f172a; }
+      .label { font: 700 13px Arial, sans-serif; fill: #475569; }
+      .line { stroke: #334155; stroke-width: 2.2; fill: none; marker-end: url(#arrow); }
+      .line-soft { stroke: #64748b; stroke-width: 1.8; fill: none; marker-end: url(#arrow-soft); stroke-dasharray: 5 4; }
+      .lifeline { stroke: #94a3b8; stroke-width: 1.8; stroke-dasharray: 8 6; }
+    </style>
+  </defs>
+  <rect class="bg" x="0" y="0" width="1400" height="1030"/>
+  <text class="title" x="40" y="48">Sequence Diagram - Flashcard Generation</text>
+  <rect class="box-soft" x="15" y="85" width="170" height="55" rx="16" ry="16"/><text class="text-bold" x="100.0" y="113" text-anchor="middle">Kullanıcı</text><line class="lifeline" x1="100" y1="140" x2="100" y2="900"/><rect class="box-soft" x="235" y="85" width="170" height="55" rx="16" ry="16"/><text class="text-bold" x="320.0" y="113" text-anchor="middle">Tarayıcı</text><line class="lifeline" x1="320" y1="140" x2="320" y2="900"/><rect class="box" x="475" y="85" width="170" height="55" rx="16" ry="16"/><text class="text-bold" x="560.0" y="113" text-anchor="middle">index()</text><line class="lifeline" x1="560" y1="140" x2="560" y2="900"/><rect class="box" x="735" y="85" width="170" height="55" rx="16" ry="16"/><text class="text-bold" x="820.0" y="113" text-anchor="middle">Gemini API</text><line class="lifeline" x1="820" y1="140" x2="820" y2="900"/><rect class="box" x="975" y="85" width="170" height="55" rx="16" ry="16"/><text class="text-bold" x="1060.0" y="113" text-anchor="middle">Session</text><line class="lifeline" x1="1060" y1="140" x2="1060" y2="900"/><rect class="box" x="1195" y="85" width="170" height="55" rx="16" ry="16"/><text class="text-bold" x="1280.0" y="113" text-anchor="middle">deck()</text><line class="lifeline" x1="1280" y1="140" x2="1280" y2="900"/><path class="line" d="M 100 170 L 320 170"/><text class="label" x="210.0" y="164.0" text-anchor="middle">form gönder</text><path class="line" d="M 320 220 L 560 220"/><text class="label" x="440.0" y="214.0" text-anchor="middle">POST /</text><path class="line" d="M 560 270 L 820 270"/><text class="label" x="690.0" y="264.0" text-anchor="middle">generate_flashcards_with_gemini()</text><path class="line" d="M 820 330 L 560 330"/><text class="label" x="690.0" y="324.0" text-anchor="middle">JSON kartlar</text><path class="line" d="M 560 390 L 1060 390"/><text class="label" x="810.0" y="384.0" text-anchor="middle">session['flashcards']</text><path class="line" d="M 560 450 L 1280 450"/><text class="label" x="920.0" y="444.0" text-anchor="middle">redirect('/deck')</text><path class="line" d="M 1280 520 L 320 520"/><text class="label" x="800.0" y="514.0" text-anchor="middle">render_template('deck.html')</text><path class="line-soft" d="M 320 590 L 100 590"/><text class="label" x="210.0" y="584.0" text-anchor="middle">çalışma kartlarını göster</text><text class="text" x="700" y="980" text-anchor="middle" style="font-size:15px; fill:#0f172a;"><tspan x="700" dy="0">Akış: kullanıcı not gönderir, route metni Gemini'ye yollar, dönen kartlar session'a alınır</tspan><tspan x="700" dy="20">ve deck sayfası render edilir.</tspan></text>
+</svg>

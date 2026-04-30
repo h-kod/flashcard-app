@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="700" viewBox="0 0 1400 700">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#334155"/>
+    </marker>
+    <marker id="arrow-soft" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#64748b"/>
+    </marker>
+    <style>
+      .bg { fill: #f8fafc; }
+      .title { font: 700 30px Arial, sans-serif; fill: #0f172a; }
+      .subtitle { font: 400 14px Arial, sans-serif; fill: #475569; }
+      .box { fill: #ffffff; stroke: #334155; stroke-width: 2; rx: 16; ry: 16; }
+      .box-soft { fill: #eff6ff; stroke: #3b82f6; stroke-width: 2; rx: 16; ry: 16; }
+      .box-warm { fill: #fff7ed; stroke: #f97316; stroke-width: 2; rx: 16; ry: 16; }
+      .box-green { fill: #ecfdf5; stroke: #10b981; stroke-width: 2; rx: 16; ry: 16; }
+      .box-violet { fill: #f5f3ff; stroke: #8b5cf6; stroke-width: 2; rx: 16; ry: 16; }
+      .text { font: 400 15px Arial, sans-serif; fill: #0f172a; }
+      .text-small { font: 400 13px Arial, sans-serif; fill: #334155; }
+      .text-bold { font: 700 16px Arial, sans-serif; fill: #0f172a; }
+      .label { font: 700 13px Arial, sans-serif; fill: #475569; }
+      .line { stroke: #334155; stroke-width: 2.2; fill: none; marker-end: url(#arrow); }
+      .line-soft { stroke: #64748b; stroke-width: 1.8; fill: none; marker-end: url(#arrow-soft); stroke-dasharray: 5 4; }
+      .lifeline { stroke: #94a3b8; stroke-width: 1.8; stroke-dasharray: 8 6; }
+    </style>
+  </defs>
+  <rect class="bg" x="0" y="0" width="1400" height="700"/>
+  <text class="title" x="40" y="48">Class Diagram</text>
+  <rect class="box-soft" x="50" y="100" width="300" height="210" rx="16" ry="16"/><text class="text-bold" x="200.0" y="128" text-anchor="middle">app.__init__</text><text class="text-small" x="200.0" y="152" text-anchor="middle">create_app()</text><text class="text-small" x="200.0" y="171" text-anchor="middle">get_gemini_api_key()</text><rect class="box" x="400" y="100" width="320" height="250" rx="16" ry="16"/><text class="text-bold" x="560.0" y="128" text-anchor="middle">app.routes</text><text class="text-small" x="560.0" y="152" text-anchor="middle">index()</text><text class="text-small" x="560.0" y="171" text-anchor="middle">deck()</text><text class="text-small" x="560.0" y="190" text-anchor="middle">cards()</text><text class="text-small" x="560.0" y="209" text-anchor="middle">edit_card()</text><text class="text-small" x="560.0" y="228" text-anchor="middle">export_cards()</text><rect class="box-violet" x="780" y="100" width="260" height="210" rx="16" ry="16"/><text class="text-bold" x="910.0" y="128" text-anchor="middle">app.models</text><text class="text-small" x="910.0" y="152" text-anchor="middle">save_card()</text><text class="text-small" x="910.0" y="171" text-anchor="middle">list_cards()</text><text class="text-small" x="910.0" y="190" text-anchor="middle">get_card()</text><text class="text-small" x="910.0" y="209" text-anchor="middle">update_card()</text><text class="text-small" x="910.0" y="228" text-anchor="middle">delete_card()</text><rect class="box-green" x="1090" y="100" width="260" height="190" rx="16" ry="16"/><text class="text-bold" x="1220.0" y="128" text-anchor="middle">app.db</text><text class="text-small" x="1220.0" y="152" text-anchor="middle">get_db()</text><text class="text-small" x="1220.0" y="171" text-anchor="middle">init_db()</text><text class="text-small" x="1220.0" y="190" text-anchor="middle">close_db()</text><text class="text-small" x="1220.0" y="209" text-anchor="middle">DATABASE_SCHEMA</text><rect class="box-warm" x="400" y="400" width="320" height="220" rx="16" ry="16"/><text class="text-bold" x="560.0" y="428" text-anchor="middle">app.gemini_client</text><text class="text-small" x="560.0" y="452" text-anchor="middle">clean_text()</text><text class="text-small" x="560.0" y="471" text-anchor="middle">build_flashcard_prompt()</text><text class="text-small" x="560.0" y="490" text-anchor="middle">parse_flashcards_response()</text><text class="text-small" x="560.0" y="509" text-anchor="middle">generate_flashcards_with_gemini()</text><rect class="box" x="780" y="400" width="260" height="220" rx="16" ry="16"/><text class="text-bold" x="910.0" y="428" text-anchor="middle">app.nlp_utils</text><text class="text-small" x="910.0" y="452" text-anchor="middle">split_sentences()</text><text class="text-small" x="910.0" y="471" text-anchor="middle">extract_keywords()</text><text class="text-small" x="910.0" y="490" text-anchor="middle">generate_flashcards()</text><text class="text-small" x="910.0" y="509" text-anchor="middle">generate_qa_pairs()</text><path class="line" d="M 350 205 L 400 205"/><text class="label" x="375.0" y="199.0" text-anchor="middle">register_blueprint</text><path class="line" d="M 720 270 L 780 200"/><text class="label" x="750.0" y="229.0" text-anchor="middle">calls</text><path class="line" d="M 920 210 L 1090 210"/><text class="label" x="1005.0" y="204.0" text-anchor="middle">uses</text><path class="line-soft" d="M 850 310 L 850 400"/><text class="label" x="850.0" y="349.0" text-anchor="middle">DB helpers</text><path class="line-soft" d="M 560 400 L 560 310"/><text class="label" x="560.0" y="349.0" text-anchor="middle">API request</text><path class="line" d="M 720 510 L 780 510"/><text class="label" x="750.0" y="504.0" text-anchor="middle">NLP helpers</text><text class="text" x="700" y="620" text-anchor="middle" style="font-size:14px; fill:#0f172a;"><tspan x="700" dy="0">Not: Bu proje fonksiyon ağırlıklı olduğu için UML sınıf diyagramı, modülleri ve</tspan><tspan x="700" dy="20">ana fonksiyonları sınıf benzeri kutularla gösteriyor.</tspan></text>
+</svg>
