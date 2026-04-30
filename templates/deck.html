@@ -27,7 +27,7 @@
         </div>
         <div class="stage-progress-meta">
           <div class="stage-progress-copy">
-            <span class="stage-progress-chip">KART AKISI</span>
+            <span class="stage-progress-chip">KONU</span>
             <strong id="stage-topic-title" class="stage-topic-title">{{ topic_title }}</strong>
           </div>
         </div>
@@ -37,22 +37,9 @@
         <div id="deck-card-stack" class="deck-card-stack"></div>
         <div id="saved-preview" class="saved-preview" hidden>
           <div class="saved-preview__backdrop"></div>
-          <article class="saved-preview__card">
-            <button id="saved-preview-flip" class="saved-preview__flip" type="button">Çevir (Space)</button>
-            <button id="saved-preview-close" class="saved-preview__close" type="button">X (Esc)</button>
-            <div id="saved-preview-panel" class="saved-preview__panel">
-              <div class="saved-preview__face saved-preview__face--front">
-                <span class="card-chip">ÖN</span>
-                <h2 id="saved-preview-question"></h2>
-                <p id="saved-preview-meta"></p>
-              </div>
-              <div class="saved-preview__face saved-preview__face--back">
-                <span class="card-chip">ARKA</span>
-                <h2 id="saved-preview-answer"></h2>
-                <p id="saved-preview-source" class="card-source"></p>
-              </div>
-            </div>
-          </article>
+          <article id="saved-preview-card" class="flashcard saved-preview__card"></article>
+          <button id="saved-preview-flip" class="saved-preview__flip" type="button">Çevir (Space)</button>
+          <button id="saved-preview-close" class="saved-preview__close" type="button">X (Esc)</button>
         </div>
       </div>
     </section>
@@ -70,10 +57,6 @@
         <div id="saved-card-list" class="saved-card-list"></div>
       </section>
 
-      <div class="panel-note">
-        <p>Kaydedilen karta tiklayinca kart acilir. Kapatmak icin X butonunu kullan, kartin ustune tiklayarak çevir.</p>
-      </div>
-
       <section class="panel-history">
         <div class="panel-section-header">
           <span class="panel-label">Oluşturulan Konular</span>
@@ -82,6 +65,28 @@
         <div id="deck-history-list" class="deck-history-list"></div>
       </section>
     </aside>
+  </div>
+  <div id="delete-confirm-modal" class="delete-confirm-modal" hidden aria-hidden="true">
+    <div class="delete-confirm-modal__backdrop" data-delete-confirm-close></div>
+    <section
+      class="delete-confirm-modal__dialog"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="delete-confirm-title"
+      aria-describedby="delete-confirm-description"
+    >
+      <span class="delete-confirm-modal__eyebrow">SİLME ONAYI</span>
+      <h2 id="delete-confirm-title">Bu öğe silinsin mi?</h2>
+      <p id="delete-confirm-description"></p>
+      <div class="delete-confirm-modal__actions">
+        <button id="delete-confirm-cancel" class="ghost-btn delete-confirm-modal__cancel" type="button">
+          Vazgeç
+        </button>
+        <button id="delete-confirm-accept" class="cta-btn delete-confirm-modal__accept" type="button">
+          Sil
+        </button>
+      </div>
+    </section>
   </div>
 </div>
 

@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', function () {
+﻿document.addEventListener('DOMContentLoaded', function () {
   const pageBody = document.body;
   const heroForm = document.querySelector('.hero-form');
   const heroDropzone = document.getElementById('hero-dropzone');
@@ -16,30 +16,58 @@ document.addEventListener('DOMContentLoaded', function () {
   const cardStack = document.getElementById('deck-card-stack');
   const savedCardList = document.getElementById('saved-card-list');
   const savedCardCount = document.getElementById('saved-card-count');
+  const savedCardsPage = document.querySelector('.saved-cards-page');
+  const savedCardsGrid = document.getElementById('saved-cards-grid');
   const deckHistoryList = document.getElementById('deck-history-list');
   const deckHistoryCount = document.getElementById('deck-history-count');
   const preview = document.getElementById('saved-preview');
-  const previewPanel = document.getElementById('saved-preview-panel');
-  const previewQuestion = document.getElementById('saved-preview-question');
-  const previewAnswer = document.getElementById('saved-preview-answer');
-  const previewSource = document.getElementById('saved-preview-source');
-  const previewMeta = document.getElementById('saved-preview-meta');
+  const previewCard = document.getElementById('saved-preview-card');
   const previewFlip = document.getElementById('saved-preview-flip');
   const previewClose = document.getElementById('saved-preview-close');
+  const deleteConfirmModal = document.getElementById('delete-confirm-modal');
+  const deleteConfirmTitle = document.getElementById('delete-confirm-title');
+  const deleteConfirmDescription = document.getElementById('delete-confirm-description');
+  const deleteConfirmCancel = document.getElementById('delete-confirm-cancel');
+  const deleteConfirmAccept = document.getElementById('delete-confirm-accept');
+  const heroGenerateButton = document.querySelector('.hero-generate-btn');
   const cardsJson = document.getElementById('deck-cards-json');
 
   const SAVED_CARDS_KEY = 'alexandria_saved_cards_v2';
   const DECK_HISTORY_KEY = 'alexandria_deck_history_v2';
+  const HIDDEN_DECK_HISTORY_KEY = 'alexandria_hidden_deck_history_v1';
+  let isLoadingLocked = false;
 
   function startLoading() {
+    if (isLoadingLocked) {
+      return;
+    }
+
+    isLoadingLocked = true;
     if (pageBody) {
       pageBody.classList.add('is-loading');
+    }
+
+    if (heroForm) {
+      Array.from(heroForm.querySelectorAll('button, input, textarea, select')).forEach(function (element) {
+        if (element && element.type !== 'hidden') {
+          element.disabled = true;
+        }
+      });
     }
   }
 
   function stopLoading() {
+    isLoadingLocked = false;
     if (pageBody) {
       pageBody.classList.remove('is-loading');
+    }
+
+    if (heroForm) {
+      Array.from(heroForm.querySelectorAll('button, input, textarea, select')).forEach(function (element) {
+        if (element && element.type !== 'hidden') {
+          element.disabled = false;
+        }
+      });
     }
   }
 
@@ -72,6 +100,10 @@ document.addEventListener('DOMContentLoaded', function () {
     heroForm.addEventListener('submit', function (event) {
       const submitter = event.submitter;
       if (submitter && submitter.name === 'action' && submitter.value === 'clear') {
+        return;
+      }
+      if (isLoadingLocked) {
+        event.preventDefault();
         return;
       }
       startLoading();
@@ -121,10 +153,7 @@ document.addEventListener('DOMContentLoaded', function () {
       return;
     }
 
-    const history = safeParseStorage(DECK_HISTORY_KEY)
-      .filter(function (deck) {
-        return deck && deck.id && Array.isArray(deck.cards) && deck.cards.length;
-      })
+    const history = getDeckHistory()
       .sort(function (left, right) {
         return new Date(right.createdAt) - new Date(left.createdAt);
       });
@@ -288,7 +317,79 @@ document.addEventListener('DOMContentLoaded', function () {
 
   applyRandomAnimationsToFilePills();
 
+  let pendingDeleteAction = null;
+
+  function initSavedCardsPage() {
+    if (!savedCardsPage || !savedCardsGrid) {
+      return;
+    }
+
+    const savedCards = Array.from(savedCardsGrid.querySelectorAll('.saved-card-flashcard'));
+
+    savedCards.forEach(function (article) {
+      bindFlashcardInteractions(article, { enableKeyboard: true });
+
+      const deleteForm = article.querySelector('form');
+      if (deleteForm) {
+        deleteForm.addEventListener('submit', function (event) {
+          event.preventDefault();
+          const button = deleteForm.querySelector('[data-delete-card]');
+          const question = button ? button.getAttribute('data-card-question') || 'Bu kart' : 'Bu kart';
+
+          openDeleteConfirm({
+            title: 'Kaydedilen kart silinsin mi?',
+            description: question,
+            onConfirm: function () {
+              deleteForm.submit();
+            },
+          });
+        });
+      }
+    });
+
+    if (deleteConfirmCancel) {
+      deleteConfirmCancel.addEventListener('click', closeDeleteConfirm);
+    }
+
+    if (deleteConfirmModal) {
+      deleteConfirmModal.addEventListener('click', function (event) {
+        if (event.target && event.target.hasAttribute('data-delete-confirm-close')) {
+          closeDeleteConfirm();
+        }
+      });
+    }
+
+    if (deleteConfirmAccept) {
+      deleteConfirmAccept.addEventListener('click', function () {
+        const action = pendingDeleteAction;
+        closeDeleteConfirm();
+        if (typeof action === 'function') {
+          action();
+        }
+      });
+    }
+
+    document.addEventListener('keydown', function (event) {
+      const target = event.target;
+      const isTypingTarget =
+        target &&
+        (target.tagName === 'INPUT' ||
+          target.tagName === 'TEXTAREA' ||
+          target.tagName === 'SELECT' ||
+          target.isContentEditable);
+
+      if (isTypingTarget) {
+        return;
+      }
+
+      if (event.code === 'Escape' && deleteConfirmModal && !deleteConfirmModal.hidden) {
+        closeDeleteConfirm();
+      }
+    });
+  }
+
   if (!deckPage || !cardsJson || !cardContainer || !cardStack) {
+    initSavedCardsPage();
     return;
   }
 
@@ -304,6 +405,48 @@ document.addEventListener('DOMContentLoaded', function () {
     localStorage.setItem(key, JSON.stringify(value));
   }
 
+  function getHiddenDeckIds() {
+    return safeParseStorage(HIDDEN_DECK_HISTORY_KEY).filter(function (value) {
+      return typeof value === 'string' && value.trim();
+    });
+  }
+
+  function hideDeckId(deckId) {
+    const hiddenDeckIds = getHiddenDeckIds();
+    if (!hiddenDeckIds.includes(deckId)) {
+      hiddenDeckIds.unshift(deckId);
+      setStorage(HIDDEN_DECK_HISTORY_KEY, hiddenDeckIds.slice(0, 100));
+    }
+  }
+
+  function closeDeleteConfirm() {
+    if (!deleteConfirmModal) {
+      return;
+    }
+
+    deleteConfirmModal.hidden = true;
+    deleteConfirmModal.setAttribute('aria-hidden', 'true');
+    pendingDeleteAction = null;
+  }
+
+  function openDeleteConfirm(options) {
+    if (!deleteConfirmModal || !deleteConfirmTitle || !deleteConfirmDescription) {
+      return;
+    }
+
+    deleteConfirmTitle.textContent = options && options.title ? options.title : 'Bu öğe silinsin mi?';
+    deleteConfirmDescription.textContent = options && options.description ? options.description : '';
+    pendingDeleteAction = options && typeof options.onConfirm === 'function' ? options.onConfirm : null;
+    deleteConfirmModal.hidden = false;
+    deleteConfirmModal.setAttribute('aria-hidden', 'false');
+
+    window.requestAnimationFrame(function () {
+      if (deleteConfirmCancel) {
+        deleteConfirmCancel.focus();
+      }
+    });
+  }
+
   function escapeHtml(value) {
     return String(value || '')
       .replace(/&/g, '&amp;')
@@ -311,6 +454,114 @@ document.addEventListener('DOMContentLoaded', function () {
       .replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;')
       .replace(/'/g, '&#39;');
+  }
+
+  function renderFlashcardActions(card, options) {
+    const actionButtons = [];
+
+    if (options && options.showPrevButton) {
+      actionButtons.push('<button class="card-nav card-nav--prev" type="button" aria-label="Onceki kart">&#8592;</button>');
+    }
+
+    if (options && options.showNextButton) {
+      actionButtons.push('<button class="card-nav card-nav--next" type="button" aria-label="Sonraki kart">&#8594;</button>');
+    }
+
+    const quickActions = [];
+
+    if (options && options.showFlipButton) {
+      quickActions.push('<button class="mini-action flip-card-btn" type="button">Çevir (Space)</button>');
+    }
+
+    if (options && options.showSaveButton) {
+      quickActions.push('<button class="mini-action save-card-btn" type="button">Kaydet (K)</button>');
+    }
+
+    if (options && options.showEditLink) {
+      quickActions.push(
+        `<a class="mini-action" href="${escapeHtml(options.editUrl || '#')}">Düzenle</a>`
+      );
+    }
+
+    if (options && options.showDeleteButton) {
+      quickActions.push(
+        `<button class="mini-action saved-card-delete-btn" type="button" data-delete-card data-card-question="${escapeHtml(
+          card.question
+        )}">Sil</button>`
+      );
+    }
+
+    if (quickActions.length) {
+      actionButtons.push(`<div class="card-quick-actions">${quickActions.join('')}</div>`);
+    }
+
+    return actionButtons.join('');
+  }
+
+  function renderFlashcardMarkup(card, options) {
+    const hintText =
+      options && typeof options.hintText === 'string' ? options.hintText : 'Karti tiklayarak arkasini gor.';
+    const showHint = !options || options.showHint !== false;
+    const sourceText = card.source ? `<p class="card-source">Kaynak: ${escapeHtml(card.source)}</p>` : '';
+
+    return `
+      ${renderFlashcardActions(card, options || {})}
+      <div class="card-panel">
+        <div class="card-face card-front">
+          <span class="card-chip">SORU</span>
+          <h2>${escapeHtml(card.question)}</h2>
+          ${showHint ? `<p>${escapeHtml(hintText)}</p>` : ''}
+        </div>
+        <div class="card-face card-back">
+          <span class="card-chip">CEVAP</span>
+          <h2>${escapeHtml(card.answer)}</h2>
+          ${sourceText}
+        </div>
+      </div>
+    `;
+  }
+
+  function bindFlashcardInteractions(article, options) {
+    if (!article) {
+      return;
+    }
+
+    if (options && options.enableKeyboard !== false) {
+      article.tabIndex = 0;
+    }
+
+    article.addEventListener('click', function (event) {
+      if (event.target.closest('button, a, form')) {
+        return;
+      }
+      article.classList.toggle('flipped');
+    });
+
+    article.addEventListener('keydown', function (event) {
+      if (event.code !== 'Space' && event.code !== 'Enter') {
+        return;
+      }
+      if (event.target.closest('button, a, input, textarea, select')) {
+        return;
+      }
+      event.preventDefault();
+      article.classList.toggle('flipped');
+    });
+  }
+
+  function createFlashcardElement(card, options) {
+    const article = document.createElement('article');
+    const className = (options && options.className) || 'flashcard';
+    article.className = className;
+    if (options && options.active) {
+      article.classList.add('active');
+    }
+    if (options && options.cardId !== undefined && options.cardId !== null) {
+      article.dataset.cardId = String(options.cardId);
+    }
+    article.innerHTML = renderFlashcardMarkup(card, options || {});
+    bindFlashcardInteractions(article, options || {});
+    return article;
   }
 
   function buildTopicTitle(text) {
@@ -352,6 +603,7 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   function getDeckHistory() {
+    const hiddenDeckIds = getHiddenDeckIds();
     return safeParseStorage(DECK_HISTORY_KEY)
       .map(function (deck) {
         if (!deck || typeof deck !== 'object') {
@@ -368,6 +620,10 @@ document.addEventListener('DOMContentLoaded', function () {
           : [];
 
         if (!deckId || !cards.length) {
+          return null;
+        }
+
+        if (hiddenDeckIds.includes(deckId)) {
           return null;
         }
 
@@ -399,6 +655,10 @@ document.addEventListener('DOMContentLoaded', function () {
   };
 
   function persistDeck(deck) {
+    if (getHiddenDeckIds().includes(deck.id)) {
+      return;
+    }
+
     const history = getDeckHistory();
     const payload = {
       id: deck.id,
@@ -426,14 +686,26 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
+  function getSavedCardKey(cardData) {
+    if (!cardData) {
+      return '';
+    }
+
+    return `${cardData.deckId || ''}:${cardData.cardIndex}`;
+  }
+
+  let activeSavedCardKey = '';
+
   function closeSavedPreview() {
     if (!preview) {
       return;
     }
     preview.hidden = true;
-    if (previewPanel) {
-      previewPanel.classList.remove('is-flipped');
+    if (previewCard) {
+      previewCard.classList.remove('flipped');
     }
+    activeSavedCardKey = '';
+    renderSavedCards();
   }
 
   function isPreviewOpen() {
@@ -441,10 +713,10 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   function togglePreviewFlip() {
-    if (!isPreviewOpen() || !previewPanel) {
+    if (!isPreviewOpen() || !previewCard) {
       return;
     }
-    previewPanel.classList.toggle('is-flipped');
+    previewCard.classList.toggle('flipped');
   }
 
   function toggleActiveCardFlip() {
@@ -512,23 +784,65 @@ document.addEventListener('DOMContentLoaded', function () {
         return new Date(right.savedAt || 0) - new Date(left.savedAt || 0);
       })
       .forEach(function (card) {
-        const button = document.createElement('button');
-        button.type = 'button';
-        button.className = 'saved-card-item';
+        const item = document.createElement('div');
+        item.className = 'saved-card-item';
+        if (getSavedCardKey(card) === activeSavedCardKey) {
+          item.classList.add('is-active');
+        }
+
+        const openButton = document.createElement('button');
+        openButton.type = 'button';
+        openButton.className = 'saved-card-item__open';
 
         const title = document.createElement('strong');
         title.textContent = card.question;
 
         const meta = document.createElement('span');
-        meta.className = 'saved-card-meta';
-        meta.textContent = `${card.deckTitle} • ${card.cardIndex + 1}. kart`;
+        meta.className = 'saved-card-item__meta';
+        meta.textContent = `${card.deckTitle || 'Flashcard Seti'} • ${card.cardIndex + 1}. kart`;
 
-        button.appendChild(title);
-        button.addEventListener('click', function () {
+        openButton.appendChild(title);
+        openButton.appendChild(meta);
+
+        const deleteButton = document.createElement('button');
+        deleteButton.type = 'button';
+        deleteButton.className = 'saved-card-delete-btn';
+        deleteButton.setAttribute('aria-label', `${card.question} kartını sil`);
+        deleteButton.textContent = '×';
+
+        deleteButton.addEventListener('click', function (event) {
+          event.stopPropagation();
+          openDeleteConfirm({
+            title: 'Kaydedilen kart silinsin mi?',
+            description: card.question,
+            onConfirm: function () {
+              deleteSavedCard(card);
+            },
+          });
+        });
+
+        openButton.addEventListener('click', function () {
           openSavedPreview(card);
         });
-        savedCardList.appendChild(button);
+
+        item.appendChild(openButton);
+        item.appendChild(deleteButton);
+        savedCardList.appendChild(item);
       });
+  }
+
+  function deleteSavedCard(cardData) {
+    const targetKey = getSavedCardKey(cardData);
+    const savedCards = getSavedCards().filter(function (item) {
+      return getSavedCardKey(item) !== targetKey;
+    });
+
+    setStorage(SAVED_CARDS_KEY, savedCards);
+    if (getSavedCardKey(cardData) === activeSavedCardKey) {
+      closeSavedPreview();
+    }
+    renderSavedCards();
+    updateSaveButtons();
   }
 
   function loadDeck(deck) {
@@ -573,18 +887,69 @@ document.addEventListener('DOMContentLoaded', function () {
         return new Date(right.createdAt) - new Date(left.createdAt);
       })
       .forEach(function (deck) {
-        const button = document.createElement('button');
-        button.type = 'button';
-        button.className = 'deck-history-item';
+        const item = document.createElement('div');
+        item.className = 'deck-history-item';
         if (deck.id === currentDeck.id) {
-          button.classList.add('is-active');
+          item.classList.add('is-active');
         }
-        button.textContent = `${deck.title} - ${formatDateLabel(deck.createdAt)}`;
-        button.addEventListener('click', function () {
+
+        const openButton = document.createElement('button');
+        openButton.type = 'button';
+        openButton.className = 'deck-history-item__open';
+
+        const title = document.createElement('span');
+        title.className = 'deck-history-item__title';
+        title.textContent = deck.title;
+
+        const meta = document.createElement('span');
+        meta.className = 'deck-history-item__meta';
+        meta.textContent = `${formatDateLabel(deck.createdAt)} • ${deck.cards.length} kart`;
+
+        openButton.appendChild(title);
+        openButton.appendChild(meta);
+
+        const deleteButton = document.createElement('button');
+        deleteButton.type = 'button';
+        deleteButton.className = 'deck-history-item__delete';
+        deleteButton.setAttribute('aria-label', `${deck.title} konusunu sil`);
+        deleteButton.textContent = '×';
+
+        deleteButton.addEventListener('click', function (event) {
+          event.stopPropagation();
+          openDeleteConfirm({
+            title: 'Oluşturulan konu silinsin mi?',
+            description: deck.title,
+            onConfirm: function () {
+              deleteDeckHistory(deck.id);
+            },
+          });
+        });
+
+        openButton.addEventListener('click', function () {
           loadDeck(deck);
         });
-        deckHistoryList.appendChild(button);
+
+        item.appendChild(openButton);
+        item.appendChild(deleteButton);
+        deckHistoryList.appendChild(item);
       });
+  }
+
+  function deleteDeckHistory(deckId) {
+    const filteredHistory = getDeckHistory().filter(function (deck) {
+      return deck.id !== deckId;
+    });
+
+    hideDeckId(deckId);
+    setStorage(DECK_HISTORY_KEY, filteredHistory);
+
+    if (currentDeck.id === deckId) {
+      currentDeck.activeIndex = Math.max(0, Math.min(currentDeck.activeIndex, currentDeck.cards.length - 1));
+    }
+
+    renderDeckHistory();
+    updateProgress();
+    renderSavedCards();
   }
 
   function saveCard(cardData) {
@@ -628,26 +993,24 @@ document.addEventListener('DOMContentLoaded', function () {
 
   function openSavedPreview(card) {
     const normalizedCard = normalizeCard(card, card && card.deckId, card && card.deckTitle, card && card.cardIndex);
-    if (
-      !normalizedCard ||
-      !preview ||
-      !previewPanel ||
-      !previewQuestion ||
-      !previewAnswer ||
-      !previewSource ||
-      !previewMeta
-    ) {
+    if (!normalizedCard || !preview || !previewCard) {
       return;
     }
 
     preview.hidden = false;
-    previewPanel.classList.remove('is-flipped');
-    previewQuestion.textContent = normalizedCard.question;
-    previewAnswer.textContent = normalizedCard.answer;
-    previewSource.textContent = normalizedCard.source ? `Kaynak: ${normalizedCard.source}` : '';
-    previewMeta.textContent = `${normalizedCard.deckTitle} • ${normalizedCard.cardIndex + 1}. kart${
-      card.savedAt ? ` • ${formatDateLabel(card.savedAt)}` : ''
-    }`;
+    previewCard.classList.remove('flipped');
+    previewCard.innerHTML = renderFlashcardMarkup(normalizedCard, {
+      showPrevButton: false,
+      showNextButton: false,
+      showFlipButton: false,
+      showSaveButton: false,
+      showEditLink: false,
+      showDeleteButton: false,
+      showHint: true,
+      hintText: 'Karti tiklayarak arkasini gor.',
+    });
+    activeSavedCardKey = getSavedCardKey(normalizedCard);
+    renderSavedCards();
   }
 
   function goPrevious() {
@@ -668,37 +1031,23 @@ document.addEventListener('DOMContentLoaded', function () {
     cardStack.innerHTML = '';
 
     currentDeck.cards.forEach(function (card, index) {
-      const article = document.createElement('article');
-      article.className = 'flashcard';
+      const article = createFlashcardElement(card, {
+        className: 'flashcard',
+        active: index === currentDeck.activeIndex,
+        showPrevButton: true,
+        showNextButton: true,
+        showFlipButton: true,
+        showSaveButton: true,
+        showHint: true,
+      });
+
       if (index === currentDeck.activeIndex) {
-        article.classList.add('active');
         article.style.opacity = '1';
         article.style.pointerEvents = 'auto';
       } else {
         article.style.opacity = '0';
         article.style.pointerEvents = 'none';
       }
-
-      article.innerHTML = `
-        <button class="card-nav card-nav--prev" type="button" aria-label="Onceki kart">&#8592;</button>
-        <button class="card-nav card-nav--next" type="button" aria-label="Sonraki kart">&#8594;</button>
-        <div class="card-quick-actions">
-          <button class="mini-action flip-card-btn" type="button">Çevir (Space)</button>
-          <button class="mini-action save-card-btn" type="button">Kaydet (K)</button>
-        </div>
-        <div class="card-panel">
-          <div class="card-face card-front">
-            <span class="card-chip">ON</span>
-            <h2>${escapeHtml(card.question)}</h2>
-            <p>Karti tiklayarak arkasini gor.</p>
-          </div>
-          <div class="card-face card-back">
-            <span class="card-chip">ARKA</span>
-            <h2>${escapeHtml(card.answer)}</h2>
-            ${card.source ? `<p class="card-source">Kaynak: ${escapeHtml(card.source)}</p>` : ''}
-          </div>
-        </div>
-      `;
 
       const prevButton = article.querySelector('.card-nav--prev');
       const nextButton = article.querySelector('.card-nav--next');
@@ -723,13 +1072,6 @@ document.addEventListener('DOMContentLoaded', function () {
       saveButton.addEventListener('click', function (event) {
         event.stopPropagation();
         saveCard(card);
-      });
-
-      article.addEventListener('click', function (event) {
-        if (event.target.closest('button')) {
-          return;
-        }
-        article.classList.toggle('flipped');
       });
 
       cardStack.appendChild(article);
@@ -764,6 +1106,28 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
+  if (deleteConfirmCancel) {
+    deleteConfirmCancel.addEventListener('click', closeDeleteConfirm);
+  }
+
+  if (deleteConfirmModal) {
+    deleteConfirmModal.addEventListener('click', function (event) {
+      if (event.target && event.target.hasAttribute('data-delete-confirm-close')) {
+        closeDeleteConfirm();
+      }
+    });
+  }
+
+  if (deleteConfirmAccept) {
+    deleteConfirmAccept.addEventListener('click', function () {
+      const action = pendingDeleteAction;
+      closeDeleteConfirm();
+      if (typeof action === 'function') {
+        action();
+      }
+    });
+  }
+
   document.addEventListener('keydown', function (event) {
     const target = event.target;
     const isTypingTarget =
@@ -787,6 +1151,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (event.code === 'Escape' && isPreviewOpen()) {
       closeSavedPreview();
+      return;
+    }
+
+    if (event.code === 'Escape' && deleteConfirmModal && !deleteConfirmModal.hidden) {
+      closeDeleteConfirm();
       return;
     }
 

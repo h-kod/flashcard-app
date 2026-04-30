@@ -1,38 +1,81 @@
 {% extends 'base.html' %}
 
 {% block content %}
-  <section>
-    <h2>Kaydedilmiş Kartlar</h2>
-    {% if cards %}
-      <table>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Soru</th>
-            <th>Cevap</th>
-            <th>Kaynak</th>
-            <th>İşlemler</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for card in cards %}
-            <tr>
-              <td>{{ card.id }}</td>
-              <td>{{ card.question }}</td>
-              <td>{{ card.answer }}</td>
-              <td>{{ card.source }}</td>
-              <td>
-                <a href="{{ url_for('main.edit_card', card_id=card.id) }}">Düzenle</a>
-                <form method="post" action="{{ url_for('main.delete_card_route', card_id=card.id) }}" class="inline-form">
-                  <button type="submit">Sil</button>
-                </form>
-              </td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    {% else %}
-      <p>Henüz kaydedilmiş kart yok.</p>
-    {% endif %}
+<section class="saved-cards-page">
+  <div class="saved-cards-page__header">
+    <div>
+      <a href="{{ url_for('main.index') }}" class="hero-badge" aria-label="Anasayfaya dön">
+        <span class="material-symbols-outlined">psychology</span>
+        <span>Hüseyin // KART</span>
+      </a>
+      <h1>Kaydedilen Kartlar</h1>
+      <p>Kaydedilen kartlari default kart görünümüyle inceleyin, çevirin, düzenleyin veya silin.</p>
+    </div>
+    <div class="saved-cards-page__summary">
+      <strong>{{ cards|length }}</strong>
+      <span>kart</span>
+    </div>
+  </div>
+
+  {% if cards %}
+    <div id="saved-cards-grid" class="saved-cards-grid">
+      {% for card in cards %}
+        <article class="flashcard saved-card-flashcard" tabindex="0" data-card-id="{{ card.id }}">
+          <div class="card-quick-actions">
+            <a class="mini-action" href="{{ url_for('main.edit_card', card_id=card.id) }}">Düzenle</a>
+            <form method="post" action="{{ url_for('main.delete_card_route', card_id=card.id) }}" class="inline-form">
+              <button
+                type="submit"
+                class="mini-action saved-card-delete-btn"
+                data-delete-card
+                data-card-question="{{ card.question }}"
+              >
+                Sil
+              </button>
+            </form>
+          </div>
+          <div class="card-panel">
+            <div class="card-face card-front">
+              <span class="card-chip">SORU</span>
+              <h2>{{ card.question }}</h2>
+              <p>Karti tiklayarak arkasini gor.</p>
+            </div>
+            <div class="card-face card-back">
+              <span class="card-chip">CEVAP</span>
+              <h2>{{ card.answer }}</h2>
+              {% if card.source %}
+                <p class="card-source">Kaynak: {{ card.source }}</p>
+              {% endif %}
+            </div>
+          </div>
+        </article>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="panel-empty saved-cards-empty">Henüz kaydedilmiş kart yok.</p>
+  {% endif %}
+</section>
+
+<div id="delete-confirm-modal" class="delete-confirm-modal" hidden aria-hidden="true">
+  <div class="delete-confirm-modal__backdrop" data-delete-confirm-close></div>
+  <section
+    class="delete-confirm-modal__dialog"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="delete-confirm-title"
+    aria-describedby="delete-confirm-description"
+  >
+    <span class="delete-confirm-modal__eyebrow">SİLME ONAYI</span>
+    <h2 id="delete-confirm-title">Bu öğe silinsin mi?</h2>
+    <p id="delete-confirm-description"></p>
+    <div class="delete-confirm-modal__actions">
+      <button id="delete-confirm-cancel" class="ghost-btn delete-confirm-modal__cancel" type="button">
+        Vazgeç
+      </button>
+      <button id="delete-confirm-accept" class="cta-btn delete-confirm-modal__accept" type="button">
+        Sil
+      </button>
+    </div>
   </section>
+</div>
 {% endblock %}
