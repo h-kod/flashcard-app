@@ -84,3 +84,14 @@ pytest
 ## İletişim
 
 Sorularınız için [GitHub Issues](https://github.com/h-kod/TYZM-623-01-Projem/issues) kullanabilirsiniz.
+## Testing
+
+Automated tests can be run with:
+
+```bash
+python -m pytest
+```
+
+## License
+
+This project is licensed under the MIT License.

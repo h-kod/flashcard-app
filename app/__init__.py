@@ -25,7 +25,7 @@ def get_gemini_api_key() -> str:
     return os.environ.get('GEMINI_API_KEY', '').strip()
 
 
-def create_app():
+def create_app(test_config=None):
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     template_folder = os.path.join(base_dir, 'templates')
     static_folder = os.path.join(base_dir, 'static')
@@ -50,6 +50,9 @@ def create_app():
             if root.strip()
         ],
     )
+
+    if test_config:
+        app.config.update(test_config)
 
     init_db(app)
 
