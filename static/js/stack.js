@@ -34,6 +34,106 @@
   const SAVED_CARDS_KEY = 'alexandria_saved_cards_v2';
   const DECK_HISTORY_KEY = 'alexandria_deck_history_v2';
   const HIDDEN_DECK_HISTORY_KEY = 'alexandria_hidden_deck_history_v1';
+  const DEFAULT_PROJECT_INTRO_DECK_ID = 'project-intro-v1';
+  const DEFAULT_PROJECT_INTRO_DECK_TITLE = 'Proje Tanıtımı';
+  const DEFAULT_PROJECT_INTRO_DECK = {
+    id: DEFAULT_PROJECT_INTRO_DECK_ID,
+    title: DEFAULT_PROJECT_INTRO_DECK_TITLE,
+    createdAt: '2026-04-30T00:00:00.000',
+    activeIndex: 0,
+    cards: [
+      {
+        deckId: DEFAULT_PROJECT_INTRO_DECK_ID,
+        deckTitle: DEFAULT_PROJECT_INTRO_DECK_TITLE,
+        cardIndex: 0,
+        question: 'Bu proje ne geliştirir?',
+        answer:
+          'Bu proje, ders notlarını otomatik olarak soru-cevap kartlarına dönüştüren bir öğrenme uygulaması geliştirir.',
+        source: DEFAULT_PROJECT_INTRO_DECK_TITLE,
+      },
+      {
+        deckId: DEFAULT_PROJECT_INTRO_DECK_ID,
+        deckTitle: DEFAULT_PROJECT_INTRO_DECK_TITLE,
+        cardIndex: 1,
+        question: 'Projenin temel amacı nedir?',
+        answer:
+          'Temel amaç, öğrencilerin uzun ders notlarını daha kısa, tekrar edilebilir ve etkileşimli kartlara dönüştürerek öğrenme sürecini hızlandırmaktır.',
+        source: DEFAULT_PROJECT_INTRO_DECK_TITLE,
+      },
+      {
+        deckId: DEFAULT_PROJECT_INTRO_DECK_ID,
+        deckTitle: DEFAULT_PROJECT_INTRO_DECK_TITLE,
+        cardIndex: 2,
+        question: 'Kullanıcı uygulamada ne yapar?',
+        answer:
+          'Kullanıcı ders notunu metin olarak yapıştırır veya dosya yükler, kart sayısını seçer ve sistemden otomatik kart üretmesini ister.',
+        source: DEFAULT_PROJECT_INTRO_DECK_TITLE,
+      },
+      {
+        deckId: DEFAULT_PROJECT_INTRO_DECK_ID,
+        deckTitle: DEFAULT_PROJECT_INTRO_DECK_TITLE,
+        cardIndex: 3,
+        question: 'Kartlar nasıl çalışılır?',
+        answer:
+          'Kullanıcı öğrenme ekranında kartlar arasında ilerler, kartı çevirerek cevabı görür ve önemli gördüğü kartları kaydedebilir.',
+        source: DEFAULT_PROJECT_INTRO_DECK_TITLE,
+      },
+      {
+        deckId: DEFAULT_PROJECT_INTRO_DECK_ID,
+        deckTitle: DEFAULT_PROJECT_INTRO_DECK_TITLE,
+        cardIndex: 4,
+        question: 'Yapay zeka bu projede ne işe yarar?',
+        answer:
+          'Yapay zeka, verilen ders notundaki önemli kavramları yorumlayarak anlamlı soru-cevap çiftleri üretmek için kullanılır.',
+        source: DEFAULT_PROJECT_INTRO_DECK_TITLE,
+      },
+      {
+        deckId: DEFAULT_PROJECT_INTRO_DECK_ID,
+        deckTitle: DEFAULT_PROJECT_INTRO_DECK_TITLE,
+        cardIndex: 5,
+        question: 'Konu geçmişi ne sağlar?',
+        answer:
+          'Konu geçmişi, oluşturulan kart setlerini yerel olarak saklar ve kullanıcının önceki öğrenme setlerine tekrar ulaşmasını sağlar.',
+        source: DEFAULT_PROJECT_INTRO_DECK_TITLE,
+      },
+      {
+        deckId: DEFAULT_PROJECT_INTRO_DECK_ID,
+        deckTitle: DEFAULT_PROJECT_INTRO_DECK_TITLE,
+        cardIndex: 6,
+        question: 'Kaydedilen kartlar neden önemlidir?',
+        answer:
+          'Kaydedilen kartlar, kullanıcının kritik gördüğü soruları ayrı bir alanda toplamasını ve daha sonra tekrar çalışmasını sağlar.',
+        source: DEFAULT_PROJECT_INTRO_DECK_TITLE,
+      },
+      {
+        deckId: DEFAULT_PROJECT_INTRO_DECK_ID,
+        deckTitle: DEFAULT_PROJECT_INTRO_DECK_TITLE,
+        cardIndex: 7,
+        question: 'Projede hangi teknolojiler kullanılır?',
+        answer:
+          'Projede Python Flask, Jinja2, HTML, CSS, JavaScript, SQLite, localStorage ve Gemini tabanlı kart üretim yaklaşımı kullanılır.',
+        source: DEFAULT_PROJECT_INTRO_DECK_TITLE,
+      },
+      {
+        deckId: DEFAULT_PROJECT_INTRO_DECK_ID,
+        deckTitle: DEFAULT_PROJECT_INTRO_DECK_TITLE,
+        cardIndex: 8,
+        question: 'Veriler nerede tutulur?',
+        answer:
+          'Oluşturulan konu geçmişi tarayıcı localStorage üzerinde, kaydedilen kartlar ise uygulamanın SQLite veritabanı ve yerel kayıt yapısı üzerinde tutulur.',
+        source: DEFAULT_PROJECT_INTRO_DECK_TITLE,
+      },
+      {
+        deckId: DEFAULT_PROJECT_INTRO_DECK_ID,
+        deckTitle: DEFAULT_PROJECT_INTRO_DECK_TITLE,
+        cardIndex: 9,
+        question: 'Bu projenin yazılım mühendisliği katkısı nedir?',
+        answer:
+          'Proje; gereksinim analizi, tasarım, gerçekleştirim, test, kalite ve konfigürasyon yönetimi kavramlarını çalışan bir eğitim yazılımı üzerinde somutlaştırır.',
+        source: DEFAULT_PROJECT_INTRO_DECK_TITLE,
+      },
+    ],
+  };
   let isLoadingLocked = false;
   let pendingDeleteAction = null;
   let savedCardsCache = null;
@@ -113,6 +213,27 @@
       hour: '2-digit',
       minute: '2-digit',
     });
+  }
+
+  function seedDefaultProjectIntroDeck() {
+    const hiddenDeckIds = safeParseStorage(HIDDEN_DECK_HISTORY_KEY);
+    if (Array.isArray(hiddenDeckIds) && hiddenDeckIds.includes(DEFAULT_PROJECT_INTRO_DECK_ID)) {
+      return;
+    }
+
+    const deckHistory = safeParseStorage(DECK_HISTORY_KEY);
+    const history = Array.isArray(deckHistory) ? deckHistory.filter(Boolean) : [];
+    if (
+      history.some(function (deck) {
+        return deck && typeof deck === 'object' && String(deck.id || '') === DEFAULT_PROJECT_INTRO_DECK_ID;
+      })
+    ) {
+      return;
+    }
+
+    history.unshift(DEFAULT_PROJECT_INTRO_DECK);
+    localStorage.setItem(DECK_HISTORY_KEY, JSON.stringify(history.slice(0, 30)));
+    deckHistoryCache = null;
   }
 
   if (heroForm) {
@@ -305,6 +426,7 @@
   });
 
   updateHeroComposerState();
+  seedDefaultProjectIntroDeck();
   renderHeroHistoryGallery();
 
   // Apply simple random animations to the file-type pills inside the dropzone
