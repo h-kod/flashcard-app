@@ -8,23 +8,24 @@
           <span class="material-symbols-outlined">local_library</span>
           <span>HCODE // HOME</span>
         </div>
-        <h1>Flashcard Modülü</h1>
-        <p>Metni yapıştırın veya dosya yükleyin; sistem notu kartlara dönüştürsün.</p>
+        <h1>Flashcard Modulu</h1>
+        <p>Metni yapistirin veya dosya yukleyin; sistem notu kartlara donustursun.</p>
       </div>
     </header>
 
     <form class="hero-form hero-composer" method="post" enctype="multipart/form-data" data-has-input="{% if input_text %}true{% else %}false{% endif %}">
       <input id="note_file" class="hero-file-input" type="file" name="note_file" accept=".txt,.pdf,.docx" />
+      <input id="gemini_api_key" type="hidden" name="gemini_api_key" value="{{ user_gemini_api_key }}" />
 
-      <section id="hero-dropzone" class="hero-dropzone" tabindex="0" aria-label="Metin yapıştır veya dosya bırak">
-        <h2>Doğrudan Metin Yapıştır veya Dosya Yükle</h2>
+      <section id="hero-dropzone" class="hero-dropzone" tabindex="0" aria-label="Metin yapistir veya dosya birak">
+        <h2>Dogrudan Metin Yapistir veya Dosya Yukle</h2>
         <span class="hero-dropzone__hint">CTRL+V</span>
         <div class="hero-dropzone__icon">
           <span class="material-symbols-outlined">upload_file</span>
         </div>
-        <button id="choose-file-btn" class="control-btn hero-dropzone__button" type="button" aria-label="Dosya sürükle veya seç">
+        <button id="choose-file-btn" class="control-btn hero-dropzone__button" type="button" aria-label="Dosya surukle veya sec">
           <span class="hero-dropzone__button-icon" aria-hidden="true">+</span>
-          <span class="hero-dropzone__button-text">Dosya Seç</span>
+          <span class="hero-dropzone__button-text">Dosya Sec</span>
         </button>
         <div class="hero-dropzone__filetypes" aria-hidden="true">
           <span class="file-type-pill">.txt</span>
@@ -36,11 +37,11 @@
       <section class="hero-ready">
         <div class="hero-ready__header">
           <div>
-            <h2>VERİ ALINDI — İŞLEME HAZIR</h2>
+            <h2>VERI ALINDI - ISLEME HAZIR</h2>
           </div>
           <div class="hero-ready__stats">
             <span class="hero-ready__check material-symbols-outlined">check_circle</span>
-            <div id="hero-word-badge" class="hero-word-badge">0 KELİME</div>
+            <div id="hero-word-badge" class="hero-word-badge">0 KELIME</div>
           </div>
         </div>
 
@@ -49,13 +50,13 @@
             <button type="submit" name="action" value="clear" class="ghost-btn hero-clear-btn">Geri</button>
             <div id="hero-file-pill" class="hero-file-pill" hidden></div>
           </div>
-          <label class="hero-sr-only" for="note_text">Metin yapıştır veya dosya bırak</label>
-          <textarea id="note_text" class="hero-preview__text" name="note_text" placeholder="Ders notunu buraya yapıştırın...">{{ input_text }}</textarea>
+          <label class="hero-sr-only" for="note_text">Metin yapistir veya dosya birak</label>
+          <textarea id="note_text" class="hero-preview__text" name="note_text" placeholder="Ders notunu buraya yapistirin...">{{ input_text }}</textarea>
         </div>
 
         <div class="hero-actions">
           <fieldset class="hero-count-picker">
-            <legend>Kaç kart?</legend>
+            <legend>Kac kart?</legend>
             <input id="count-5" type="radio" name="card_count" value="5" {% if selected_count == 5 %}checked{% endif %} />
             <label for="count-5">5</label>
             <input id="count-10" type="radio" name="card_count" value="10" {% if selected_count == 10 %}checked{% endif %} />
@@ -64,7 +65,39 @@
             <label for="count-20">20</label>
           </fieldset>
 
-          <button type="submit" class="cta-btn hero-generate-btn">Kartları Oluştur</button>
+          <section class="hero-api-key-panel" aria-labelledby="hero-api-key-title">
+            <div class="hero-api-key-panel__copy">
+              <span class="hero-api-key-panel__eyebrow">Gemini API</span>
+              <h3 id="hero-api-key-title">Kendi API anahtarini kullan</h3>
+              <p>Her kullanici kendi Gemini API key bilgisini girebilir. Anahtar bu tarayicida saklanir ve yeni not uretiminde kullanilir.</p>
+            </div>
+            <div class="hero-api-key-panel__actions">
+              <label class="hero-sr-only" for="hero-api-key-input">Gemini API Key</label>
+              <input
+                id="hero-api-key-input"
+                class="hero-api-key-input"
+                type="password"
+                inputmode="text"
+                autocomplete="off"
+                spellcheck="false"
+                placeholder="AIza..."
+                value="{{ user_gemini_api_key }}"
+              />
+              <div class="hero-api-key-panel__buttons">
+                <button id="hero-api-key-save" type="button" class="ghost-btn">Anahtari Kaydet</button>
+                <a
+                  class="control-btn hero-api-key-link"
+                  href="https://aistudio.google.com/app/apikey"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  API Key Olustur
+                </a>
+              </div>
+            </div>
+          </section>
+
+          <button type="submit" class="cta-btn hero-generate-btn">Kartlari Olustur</button>
         </div>
       </section>
     </form>
@@ -74,15 +107,49 @@
   <div class="hero-history-panel__header">
     <div class="hero-badge">
         <span class="material-symbols-outlined">history</span>
-        <span>HCODE // ARŞİV</span>
+        <span>HCODE // ARSIV</span>
       </div>
-      <p>Oluşturulan setler burada, yeniden en üstte görünür.</p>
+      <p>Olusturulan setler burada, yeniden en ustte gorunur.</p>
   </div>
   <div id="hero-history-gallery" class="hero-history-gallery"></div>
 </section>
 
 <footer class="hero-footer">
-  <p>Hızlı yapıştır — Daha hızlı öğrenin.</p>
+  <p>Hizli yapistir - Daha hizli ogrenin.</p>
   <span>Odak Modu Aktif</span>
 </footer>
+
+<div id="api-key-modal" class="delete-confirm-modal api-key-modal" hidden aria-hidden="true">
+  <div class="delete-confirm-modal__backdrop" data-api-key-close></div>
+  <section
+    class="delete-confirm-modal__dialog api-key-modal__dialog"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="api-key-modal-title"
+    aria-describedby="api-key-modal-description"
+  >
+    <span class="delete-confirm-modal__eyebrow">API KEY GEREKLI</span>
+    <h2 id="api-key-modal-title">Yeni not olusturmadan once Gemini API key gir</h2>
+    <p id="api-key-modal-description">Kart uretimi icin kisisel Gemini API key gerekli. Asagidaki baglantidan olusturup hemen ekleyebilirsin.</p>
+    <label class="hero-sr-only" for="api-key-modal-input">Gemini API Key</label>
+    <input
+      id="api-key-modal-input"
+      class="hero-api-key-input"
+      type="password"
+      inputmode="text"
+      autocomplete="off"
+      spellcheck="false"
+      placeholder="AIza..."
+    />
+    <div class="api-key-modal__links">
+      <a class="control-btn hero-api-key-link" href="https://aistudio.google.com/app/apikey" target="_blank" rel="noreferrer">
+        API Key Olustur
+      </a>
+    </div>
+    <div class="delete-confirm-modal__actions">
+      <button id="api-key-modal-cancel" class="ghost-btn delete-confirm-modal__cancel" type="button">Vazgec</button>
+      <button id="api-key-modal-save" class="cta-btn delete-confirm-modal__accept" type="button">Kaydet ve Devam Et</button>
+    </div>
+  </section>
+</div>
 {% endblock %}

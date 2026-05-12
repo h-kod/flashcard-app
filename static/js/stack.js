@@ -7,7 +7,14 @@
   const heroWordBadge = document.getElementById('hero-word-badge');
   const heroFilePill = document.getElementById('hero-file-pill');
   const chooseFileButton = document.getElementById('choose-file-btn');
+  const geminiApiKeyField = document.getElementById('gemini_api_key');
+  const heroApiKeyInput = document.getElementById('hero-api-key-input');
+  const heroApiKeySaveButton = document.getElementById('hero-api-key-save');
   const heroHistoryGallery = document.getElementById('hero-history-gallery');
+  const apiKeyModal = document.getElementById('api-key-modal');
+  const apiKeyModalInput = document.getElementById('api-key-modal-input');
+  const apiKeyModalSaveButton = document.getElementById('api-key-modal-save');
+  const apiKeyModalCancelButton = document.getElementById('api-key-modal-cancel');
   const deckPage = document.querySelector('.deck-page');
   const positionLabel = document.getElementById('card-position');
   const progressFill = document.getElementById('stage-progress-fill');
@@ -34,6 +41,7 @@
   const SAVED_CARDS_KEY = 'alexandria_saved_cards_v2';
   const DECK_HISTORY_KEY = 'alexandria_deck_history_v2';
   const HIDDEN_DECK_HISTORY_KEY = 'alexandria_hidden_deck_history_v1';
+  const GEMINI_API_KEY_STORAGE = 'hcode_gemini_api_key_v1';
   const DEFAULT_PROJECT_INTRO_DECK_ID = 'project-intro-v1';
   const DEFAULT_PROJECT_INTRO_DECK_TITLE = 'Proje Tanıtımı';
   const DEFAULT_PROJECT_INTRO_DECK = {
@@ -198,6 +206,83 @@
     }
   }
 
+  function getStoredGeminiApiKey() {
+    try {
+      return String(localStorage.getItem(GEMINI_API_KEY_STORAGE) || '').trim();
+    } catch (error) {
+      return '';
+    }
+  }
+
+  function syncGeminiApiKeyInputs(value) {
+    const normalized = String(value || '').trim();
+
+    if (geminiApiKeyField) {
+      geminiApiKeyField.value = normalized;
+    }
+
+    if (heroApiKeyInput && heroApiKeyInput.value !== normalized) {
+      heroApiKeyInput.value = normalized;
+    }
+
+    if (apiKeyModalInput && apiKeyModalInput.value !== normalized) {
+      apiKeyModalInput.value = normalized;
+    }
+  }
+
+  function persistGeminiApiKey(value) {
+    const normalized = String(value || '').trim();
+
+    try {
+      if (normalized) {
+        localStorage.setItem(GEMINI_API_KEY_STORAGE, normalized);
+      } else {
+        localStorage.removeItem(GEMINI_API_KEY_STORAGE);
+      }
+    } catch (error) {
+      return '';
+    }
+
+    syncGeminiApiKeyInputs(normalized);
+    return normalized;
+  }
+
+  function openApiKeyModal() {
+    if (!apiKeyModal) {
+      return;
+    }
+
+    syncGeminiApiKeyInputs(getStoredGeminiApiKey());
+    apiKeyModal.hidden = false;
+    apiKeyModal.setAttribute('aria-hidden', 'false');
+
+    window.requestAnimationFrame(function () {
+      if (apiKeyModalInput) {
+        apiKeyModalInput.focus();
+      }
+    });
+  }
+
+  function closeApiKeyModal() {
+    if (!apiKeyModal) {
+      return;
+    }
+
+    apiKeyModal.hidden = true;
+    apiKeyModal.setAttribute('aria-hidden', 'true');
+  }
+
+  function ensureGeminiApiKey() {
+    const key = (geminiApiKeyField && geminiApiKeyField.value.trim()) || getStoredGeminiApiKey();
+    if (key) {
+      syncGeminiApiKeyInputs(key);
+      return key;
+    }
+
+    openApiKeyModal();
+    return '';
+  }
+
   function formatDateLabel(value) {
     if (!value) {
       return '';
@@ -240,6 +325,11 @@
     heroForm.addEventListener('submit', function (event) {
       const submitter = event.submitter;
       if (submitter && submitter.name === 'action' && submitter.value === 'clear') {
+        return;
+      }
+      if (!ensureGeminiApiKey()) {
+        event.preventDefault();
+        stopLoading();
         return;
       }
       if (isLoadingLocked) {
@@ -350,6 +440,55 @@
 
   if (heroTextInput) {
     heroTextInput.addEventListener('input', updateHeroComposerState);
+  }
+
+  syncGeminiApiKeyInputs((geminiApiKeyField && geminiApiKeyField.value) || getStoredGeminiApiKey());
+
+  if (heroApiKeyInput) {
+    heroApiKeyInput.addEventListener('input', function () {
+      if (geminiApiKeyField) {
+        geminiApiKeyField.value = heroApiKeyInput.value.trim();
+      }
+    });
+  }
+
+  if (heroApiKeySaveButton) {
+    heroApiKeySaveButton.addEventListener('click', function () {
+      persistGeminiApiKey(heroApiKeyInput ? heroApiKeyInput.value : '');
+    });
+  }
+
+  if (apiKeyModalInput) {
+    apiKeyModalInput.addEventListener('input', function () {
+      if (geminiApiKeyField) {
+        geminiApiKeyField.value = apiKeyModalInput.value.trim();
+      }
+    });
+  }
+
+  if (apiKeyModalSaveButton) {
+    apiKeyModalSaveButton.addEventListener('click', function () {
+      const savedKey = persistGeminiApiKey(apiKeyModalInput ? apiKeyModalInput.value : '');
+      if (!savedKey) {
+        return;
+      }
+      closeApiKeyModal();
+      if (heroApiKeyInput) {
+        heroApiKeyInput.focus();
+      }
+    });
+  }
+
+  if (apiKeyModalCancelButton) {
+    apiKeyModalCancelButton.addEventListener('click', closeApiKeyModal);
+  }
+
+  if (apiKeyModal) {
+    apiKeyModal.addEventListener('click', function (event) {
+      if (event.target && event.target.hasAttribute('data-api-key-close')) {
+        closeApiKeyModal();
+      }
+    });
   }
 
   if (heroFileInput) {
@@ -1265,6 +1404,11 @@
 
     if (event.code === 'Escape' && isPreviewOpen()) {
       closeSavedPreview();
+      return;
+    }
+
+    if (event.code === 'Escape' && apiKeyModal && !apiKeyModal.hidden) {
+      closeApiKeyModal();
       return;
     }
 

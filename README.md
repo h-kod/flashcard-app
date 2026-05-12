@@ -75,6 +75,21 @@ Automated tests can be run with:
 python -m pytest
 ```
 
+## Render ile Yayınlama
+
+Bu proje Render uzerinde Flask web service olarak yayimlanabilir.
+
+1. Repoyu GitHub'a push edin.
+2. Render'da `New > Blueprint` veya `New > Web Service` secin.
+3. Repo baglandiginda su ayarlari kullanin:
+   - Build Command: `pip install -r requirements.txt`
+   - Start Command: `gunicorn wsgi:app`
+4. `GEMINI_API_KEY` ortam degiskenini Render panelinden ekleyin.
+
+Repoda hazir bir [render.yaml](render.yaml) dosyasi vardir. `Blueprint` ile kurulum yaparsaniz bu ayarlar otomatik okunur.
+
+Not: Render varsayilan olarak kalici olmayan bir dosya sistemi kullanir. Bu nedenle `data/*.db` altindaki SQLite verileri deploy sonrasinda korunmaz. Kalici veri gerekiyorsa Render Postgres veya bir persistent disk kullanin.
+
 ## License
 
 This project is licensed under the MIT License.

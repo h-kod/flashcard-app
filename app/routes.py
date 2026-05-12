@@ -36,12 +36,17 @@ def word_count(text: str) -> int:
     return len(cleaned.split())
 
 
+def get_request_api_key() -> str:
+    return clean_text(request.form.get('gemini_api_key', '')).strip()
+
+
 @bp.route('/', methods=['GET', 'POST'])
 @limiter.limit("10 per hour", methods=["POST"])
 def index():
     context = {
         'input_text': session.get('input_text', ''),
         'selected_count': session.get('selected_count', 5),
+        'user_gemini_api_key': session.get('user_gemini_api_key', ''),
     }
 
     if request.method == 'POST':
@@ -51,11 +56,21 @@ def index():
 
         raw_text = request.form.get('note_text', '')
         card_count = int(request.form.get('card_count', 5) or 5)
+        request_api_key = get_request_api_key()
         upload = request.files.get('note_file')
         if upload and upload.filename:
             raw_text = upload.read().decode('utf-8', errors='ignore')
 
-        context.update({'input_text': raw_text, 'selected_count': card_count})
+        if request_api_key:
+            session['user_gemini_api_key'] = request_api_key
+
+        context.update(
+            {
+                'input_text': raw_text,
+                'selected_count': card_count,
+                'user_gemini_api_key': session.get('user_gemini_api_key', ''),
+            }
+        )
 
         text = clean_text(raw_text)
         if not text:
@@ -66,7 +81,7 @@ def index():
             flash('Kart oluşturmak için en az 50 kelimelik not girin.', 'warning')
             return render_template('index.html', **context)
 
-        api_key = current_app.config.get('GEMINI_API_KEY')
+        api_key = session.get('user_gemini_api_key', '').strip() or current_app.config.get('GEMINI_API_KEY')
         if not api_key:
             flash(
                 'Gemini API anahtarınız bulunamadı. Lütfen proje kök dizininde .env dosyası oluşturup GEMINI_API_KEY tanımlayın veya ortam değişkeni olarak ayarlayın.',

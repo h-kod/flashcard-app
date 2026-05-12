@@ -144,6 +144,75 @@ body.is-loading .loading-bar__fill {
   box-shadow: var(--shadow-soft);
 }
 
+.hero-api-key-panel {
+  display: grid;
+  gap: 0.9rem;
+  width: min(100%, 520px);
+  padding: 1rem;
+  border: 4px solid var(--line);
+  background: var(--surface);
+  box-shadow: var(--shadow-soft);
+}
+
+.hero-api-key-panel__copy {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.hero-api-key-panel__copy h3 {
+  font-family: 'Bungee', cursive;
+  font-size: clamp(1.05rem, 2vw, 1.35rem);
+  line-height: 1.05;
+}
+
+.hero-api-key-panel__copy p {
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.hero-api-key-panel__eyebrow {
+  display: inline-flex;
+  width: fit-content;
+  padding: 0.32rem 0.6rem;
+  background: #1b1b1b;
+  color: var(--accent-pale);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.hero-api-key-panel__actions {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.hero-api-key-panel__buttons,
+.api-key-modal__links {
+  display: flex;
+  gap: 0.7rem;
+  flex-wrap: wrap;
+}
+
+.hero-api-key-input {
+  width: 100%;
+  min-height: 54px;
+  padding: 0.9rem 1rem;
+  border: 4px solid var(--line);
+  background: #fff;
+  color: var(--text);
+  font: inherit;
+  font-weight: 700;
+}
+
+.hero-api-key-link {
+  text-decoration: none;
+}
+
+.api-key-modal__dialog {
+  width: min(92vw, 560px);
+}
+
 .page-shell > section:not([class]),
 .page-shell > form:not([class]) {
   width: min(1320px, calc(100% - 2rem));
