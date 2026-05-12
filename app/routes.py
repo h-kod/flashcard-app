@@ -11,7 +11,7 @@ from .gemini_client import (
     clean_text,
     generate_flashcards_with_gemini,
 )
-from .models import delete_card, get_card, list_cards, save_card, update_card
+from .rate_limiter import limiter
 
 bp = Blueprint('main', __name__)
 
@@ -37,6 +37,7 @@ def word_count(text: str) -> int:
 
 
 @bp.route('/', methods=['GET', 'POST'])
+@limiter.limit("10 per hour", methods=["POST"])
 def index():
     context = {
         'input_text': session.get('input_text', ''),
@@ -132,68 +133,68 @@ def deck():
 
 
 @bp.route('/save-card', methods=['POST'])
+@limiter.limit("30 per hour")
 def save_card_route():
-    question = request.form.get('question', '').strip()
-    answer = request.form.get('answer', '').strip()
-    source = request.form.get('source', '').strip()
+    # Card saving is now handled entirely by client-side localStorage
+    # This endpoint accepts AJAX requests and returns JSON
+    question = request.get_json().get('question', '').strip() if request.is_json else request.form.get('question', '').strip()
+    answer = request.get_json().get('answer', '').strip() if request.is_json else request.form.get('answer', '').strip()
+    source = request.get_json().get('source', '').strip() if request.is_json else request.form.get('source', '').strip()
+    
     if not question or not answer:
+        if request.is_json:
+            return {'error': 'Kart kaydetmek icin soru ve cevap gereklidir.'}, 400
         flash('Kart kaydetmek icin soru ve cevap gereklidir.', 'danger')
         return redirect(url_for('main.deck'))
-
-    save_card(current_app, question, answer, source)
+    
+    if request.is_json:
+        return {'success': True, 'message': 'Kart localStorage ile kaydedildi.'}, 200
+    
     flash('Kart basariyla kaydedildi.', 'success')
     return redirect(url_for('main.deck'))
 
 
 @bp.route('/cards')
 def cards():
-    items = list_cards(current_app)
-    return render_template('cards.html', cards=items)
+    # Cards are managed entirely by client-side localStorage
+    # This endpoint just renders the template
+    return render_template('cards.html', cards=[])
 
-
-@bp.route('/cards/<int:card_id>/edit', methods=['GET', 'POST'])
-def edit_card(card_id):
-    card = get_card(current_app, card_id)
-    if not card:
-        flash('Kart bulunamadi.', 'danger')
-        return redirect(url_for('main.cards'))
-    if request.method == 'POST':
-        question = request.form.get('question', '').strip()
-        answer = request.form.get('answer', '').strip()
-        source = request.form.get('source', '').strip()
-        if not question or not answer:
-            flash('Karti guncellemek icin soru ve cevap gereklidir.', 'danger')
-            return redirect(url_for('main.edit_card', card_id=card_id))
-        update_card(current_app, card_id, question, answer, source)
-        flash('Kart basariyla guncellendi.', 'success')
-        return redirect(url_for('main.cards'))
-    return render_template('edit_card.html', card=card)
-
-
-@bp.route('/cards/<int:card_id>/delete', methods=['POST'])
-def delete_card_route(card_id):
-    delete_card(current_app, card_id)
-    flash('Kart silindi.', 'success')
-    return redirect(url_for('main.cards'))
-
-
-@bp.route('/export', methods=['GET'])
+@bp.route('/export', methods=['GET', 'POST'])
+@limiter.limit("5 per hour")
 def export_cards():
+    # Get cards from POST request (client localStorage) or from session
     format_type = request.args.get('format', 'csv').lower()
-    cards = list_cards(current_app)
+    
+    if request.method == 'POST' and request.is_json:
+        cards = request.get_json().get('cards', [])
+    else:
+        # Fallback to session data if available
+        cards = session.get('flashcards', [])
+    
+    if not cards:
+        flash('Kartları dışa aktarmak için önce kart oluşturun.', 'warning')
+        return redirect(url_for('main.cards'))
+    
     if format_type == 'json':
-        data = json.dumps(cards, indent=2)
+        data = json.dumps(cards, indent=2, ensure_ascii=False)
         return send_file(
             io.BytesIO(data.encode('utf-8')),
             mimetype='application/json',
             as_attachment=True,
             download_name='flashcards.json',
         )
+    
     output = io.StringIO()
     writer = csv.writer(output)
-    writer.writerow(['id', 'question', 'answer', 'source', 'created_at'])
+    writer.writerow(['question', 'answer', 'source', 'created_at'])
     for card in cards:
-        writer.writerow([card['id'], card['question'], card['answer'], card['source'], card['created_at']])
+        writer.writerow([
+            card.get('question', ''),
+            card.get('answer', ''),
+            card.get('source', ''),
+            card.get('created_at', '')
+        ])
     return send_file(
         io.BytesIO(output.getvalue().encode('utf-8')),
         mimetype='text/csv',

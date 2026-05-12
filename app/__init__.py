@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
-from flask import Flask
-from .db import init_db
+from flask import Flask, request
+from .rate_limiter import init_limiter
 
 
 def load_env_file(base_dir: str) -> None:
@@ -39,7 +39,6 @@ def create_app(test_config=None):
     )
     app.config.from_mapping(
         SECRET_KEY='dev',
-        DATABASE=os.path.join(base_dir, 'data', 'app.db'),
         GEMINI_API_KEY=get_gemini_api_key(),
         GEMINI_MODEL=os.environ.get('GEMINI_MODEL', 'models/gemma-3-1b-it'),
         GEMINI_API_ROOTS=[
@@ -54,9 +53,22 @@ def create_app(test_config=None):
     if test_config:
         app.config.update(test_config)
 
-    init_db(app)
+    init_limiter(app)
 
     from .routes import bp
     app.register_blueprint(bp)
+
+    # Error handler for rate limit exceeded
+    @app.errorhandler(429)
+    def rate_limit_handler(e):
+        from flask import render_template, jsonify
+        if request.is_json or request.content_type == 'application/json':
+            return jsonify({
+                'error': 'Çok fazla istek gönderdiniz. Lütfen biraz sonra tekrar deneyin.',
+                'status': 429
+            }), 429
+        return render_template('error.html', 
+                             title='429 - Çok Fazla İstek',
+                             message='Çok fazla istek gönderdiniz. Lütfen biraz sonra tekrar deneyin.'), 429
 
     return app

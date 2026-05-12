@@ -1,81 +1,166 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<section class="saved-cards-page">
+<section class="saved-cards-page" id="saved-cards-page-wrapper">
   <div class="saved-cards-page__header">
     <div>
       <a href="{{ url_for('main.index') }}" class="hero-badge" aria-label="Anasayfaya dön">
         <span class="material-symbols-outlined">psychology</span>
-        <span>Hüseyin // KART</span>
+        <span>HCODE // KART</span>
       </a>
       <h1>Kaydedilen Kartlar</h1>
       <p>Kaydedilen kartlari default kart görünümüyle inceleyin, çevirin, düzenleyin veya silin.</p>
     </div>
     <div class="saved-cards-page__summary">
-      <strong>{{ cards|length }}</strong>
+      <strong id="saved-cards-count">0</strong>
       <span>kart</span>
     </div>
   </div>
 
-  {% if cards %}
-    <div id="saved-cards-grid" class="saved-cards-grid">
-      {% for card in cards %}
-        <article class="flashcard saved-card-flashcard" tabindex="0" data-card-id="{{ card.id }}">
-          <div class="card-quick-actions">
-            <a class="mini-action" href="{{ url_for('main.edit_card', card_id=card.id) }}">Düzenle</a>
-            <form method="post" action="{{ url_for('main.delete_card_route', card_id=card.id) }}" class="inline-form">
-              <button
-                type="submit"
-                class="mini-action saved-card-delete-btn"
-                data-delete-card
-                data-card-question="{{ card.question }}"
-              >
-                Sil
-              </button>
-            </form>
-          </div>
-          <div class="card-panel">
-            <div class="card-face card-front">
-              <span class="card-chip">SORU</span>
-              <h2>{{ card.question }}</h2>
-              <p>Karti tiklayarak arkasini gor.</p>
-            </div>
-            <div class="card-face card-back">
-              <span class="card-chip">CEVAP</span>
-              <h2>{{ card.answer }}</h2>
-              {% if card.source %}
-                <p class="card-source">Kaynak: {{ card.source }}</p>
-              {% endif %}
-            </div>
-          </div>
-        </article>
-      {% endfor %}
-    </div>
-  {% else %}
-    <p class="panel-empty saved-cards-empty">Henüz kaydedilmiş kart yok.</p>
-  {% endif %}
+  <div id="saved-cards-grid" class="saved-cards-grid">
+    <!-- Cards will be populated by JavaScript from localStorage -->
+  </div>
+
+  <div id="saved-preview" hidden aria-hidden="true">
+    <div id="saved-preview-card" class="flashcard"></div>
+    <button id="saved-preview-flip" type="button" class="mini-action" aria-label="Kartı çevir">
+      Çevir
+    </button>
+    <button id="saved-preview-close" type="button" class="mini-action" aria-label="Önizlemeyi kapat">
+      Kapat
+    </button>
+  </div>
 </section>
 
-<div id="delete-confirm-modal" class="delete-confirm-modal" hidden aria-hidden="true">
-  <div class="delete-confirm-modal__backdrop" data-delete-confirm-close></div>
-  <section
-    class="delete-confirm-modal__dialog"
-    role="dialog"
-    aria-modal="true"
-    aria-labelledby="delete-confirm-title"
-    aria-describedby="delete-confirm-description"
-  >
-    <span class="delete-confirm-modal__eyebrow">SİLME ONAYI</span>
-    <h2 id="delete-confirm-title">Bu öğe silinsin mi?</h2>
-    <p id="delete-confirm-description"></p>
-    <div class="delete-confirm-modal__actions">
-      <button id="delete-confirm-cancel" class="ghost-btn delete-confirm-modal__cancel" type="button">
-        Vazgeç
-      </button>
-      <button id="delete-confirm-accept" class="cta-btn delete-confirm-modal__accept" type="button">
-        Sil
-      </button>
-    </div>
-  </section>
-</div>
+<script>
+  // Load and render saved cards from localStorage
+  document.addEventListener('DOMContentLoaded', function() {
+    const gridElement = document.getElementById('saved-cards-grid');
+    const countElement = document.getElementById('saved-cards-count');
+    if (!gridElement) return;
+
+    // Get saved cards from localStorage
+    const SAVED_CARDS_KEY = 'alexandria_saved_cards_v2';
+    function safeParseStorage(key) {
+      try {
+        return JSON.parse(localStorage.getItem(key) || '[]');
+      } catch (error) {
+        return [];
+      }
+    }
+
+    const savedCards = safeParseStorage(SAVED_CARDS_KEY);
+    
+    if (countElement) {
+      countElement.textContent = String(savedCards.length);
+    }
+
+    if (!savedCards.length) {
+      gridElement.innerHTML = '<p class="panel-empty">Kaydedilen kartın yok. Kartları çalışırken kaydet!</p>';
+      return;
+    }
+
+    gridElement.innerHTML = '';
+    
+    // Render each saved card
+    savedCards.forEach(function(card, index) {
+      const article = document.createElement('article');
+      article.className = 'flashcard saved-card-flashcard';
+      article.setAttribute('tabindex', '0');
+      article.dataset.cardIndex = index;
+      
+      const cardQuestion = (card.question || '').replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+      
+      const cardAnswer = (card.answer || '').replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+      
+      const cardSource = (card.source || '').replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+
+      const sourceHTML = cardSource ? `<p class="card-source">Kaynak: ${cardSource}</p>` : '';
+      
+      article.innerHTML = `
+        <div class="card-quick-actions">
+          <button type="button" class="mini-action edit-card-btn" data-card-index="${index}">Düzenle</button>
+          <button type="button" class="mini-action saved-card-delete-btn" data-card-index="${index}" data-card-question="${cardQuestion}">Sil</button>
+        </div>
+        <div class="card-panel">
+          <div class="card-face card-front">
+            <span class="card-chip">SORU</span>
+            <h2>${cardQuestion}</h2>
+            <p>Karti tiklayarak arkasini gor.</p>
+          </div>
+          <div class="card-face card-back">
+            <span class="card-chip">CEVAP</span>
+            <h2>${cardAnswer}</h2>
+            ${sourceHTML}
+          </div>
+        </div>
+      `;
+      
+      // Handle flip on click
+      article.addEventListener('click', function(e) {
+        if (e.target.closest('button')) return;
+        article.classList.toggle('flipped');
+      });
+      
+      // Handle spacebar flip
+      article.addEventListener('keydown', function(e) {
+        if (e.code === 'Space') {
+          e.preventDefault();
+          article.classList.toggle('flipped');
+        }
+      });
+      
+      // Handle delete
+      const deleteBtn = article.querySelector('.saved-card-delete-btn');
+      if (deleteBtn) {
+        deleteBtn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          if (confirm(`Kartı silmek istediğinizden emin misiniz?\n\n"${card.question}"`)) {
+            savedCards.splice(index, 1);
+            localStorage.setItem(SAVED_CARDS_KEY, JSON.stringify(savedCards));
+            location.reload();
+          }
+        });
+      }
+      
+      // Handle edit
+      const editBtn = article.querySelector('.edit-card-btn');
+      if (editBtn) {
+        editBtn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          // For now, show a prompt to edit inline or redirect to edit page
+          const newQuestion = prompt('Soruyu düzenle:', card.question);
+          if (newQuestion !== null) {
+            card.question = newQuestion;
+            const newAnswer = prompt('Cevabı düzenle:', card.answer);
+            if (newAnswer !== null) {
+              card.answer = newAnswer;
+              const newSource = prompt('Kaynağı düzenle:', card.source || '');
+              if (newSource !== null) {
+                card.source = newSource;
+                savedCards[index] = card;
+                localStorage.setItem(SAVED_CARDS_KEY, JSON.stringify(savedCards));
+                location.reload();
+              }
+            }
+          }
+        });
+      }
+      
+      gridElement.appendChild(article);
+    });
+  });
+</script>
 {% endblock %}
