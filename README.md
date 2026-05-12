@@ -1,4 +1,4 @@
-# Ders Notlarından NLP Tabanlı Otomatik Flashcard ve Soru-Cevap Üretim Sistemi
+# Ders Notlarından Yapay Zeka Destekli Flashcard Üretim Sistemi
 
 ## Proje Açıklaması
 
