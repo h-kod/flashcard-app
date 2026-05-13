@@ -41,7 +41,7 @@
   const HIDDEN_DECK_HISTORY_KEY = 'alexandria_hidden_deck_history_v1';
   const GEMINI_API_KEY_STORAGE = 'hcode_gemini_api_key_v1';
   const DEFAULT_PROJECT_INTRO_DECK_ID = 'project-intro-v1';
-  const DEFAULT_PROJECT_INTRO_DECK_TITLE = 'Proje Tanıtımı';
+  const DEFAULT_PROJECT_INTRO_DECK_TITLE = 'Uygulama Tanıtımı';
   const DEFAULT_PROJECT_INTRO_DECK = {
     id: DEFAULT_PROJECT_INTRO_DECK_ID,
     title: DEFAULT_PROJECT_INTRO_DECK_TITLE,
@@ -52,16 +52,16 @@
         deckId: DEFAULT_PROJECT_INTRO_DECK_ID,
         deckTitle: DEFAULT_PROJECT_INTRO_DECK_TITLE,
         cardIndex: 0,
-        question: 'Bu proje ne geliştirir?',
+        question: 'Bu uygulama ne geliştirir?',
         answer:
-          'Bu proje, ders notlarını otomatik olarak soru-cevap kartlarına dönüştüren bir öğrenme uygulaması geliştirir.',
+          'Bu uygulama, ders notlarını otomatik olarak soru-cevap kartlarına dönüştüren bir öğrenme uygulaması geliştirir.',
         source: DEFAULT_PROJECT_INTRO_DECK_TITLE,
       },
       {
         deckId: DEFAULT_PROJECT_INTRO_DECK_ID,
         deckTitle: DEFAULT_PROJECT_INTRO_DECK_TITLE,
         cardIndex: 1,
-        question: 'Projenin temel amacı nedir?',
+        question: 'Uygulamanın temel amacı nedir?',
         answer:
           'Temel amaç, öğrencilerin uzun ders notlarını daha kısa, tekrar edilebilir ve etkileşimli kartlara dönüştürerek öğrenme sürecini hızlandırmaktır.',
         source: DEFAULT_PROJECT_INTRO_DECK_TITLE,
@@ -88,7 +88,7 @@
         deckId: DEFAULT_PROJECT_INTRO_DECK_ID,
         deckTitle: DEFAULT_PROJECT_INTRO_DECK_TITLE,
         cardIndex: 4,
-        question: 'Yapay zeka bu projede ne işe yarar?',
+        question: 'Yapay zeka bu uygulamada ne işe yarar?',
         answer:
           'Yapay zeka, verilen ders notundaki önemli kavramları yorumlayarak anlamlı soru-cevap çiftleri üretmek için kullanılır.',
         source: DEFAULT_PROJECT_INTRO_DECK_TITLE,
@@ -115,9 +115,9 @@
         deckId: DEFAULT_PROJECT_INTRO_DECK_ID,
         deckTitle: DEFAULT_PROJECT_INTRO_DECK_TITLE,
         cardIndex: 7,
-        question: 'Projede hangi teknolojiler kullanılır?',
+        question: 'Uygulamada hangi teknolojiler kullanılır?',
         answer:
-          'Projede Python Flask, Jinja2, HTML, CSS, JavaScript, SQLite, localStorage ve Gemini tabanlı kart üretim yaklaşımı kullanılır.',
+          'Uygulamada Python Flask, Jinja2, HTML, CSS, JavaScript, SQLite, localStorage ve Gemini tabanlı kart üretim yaklaşımı kullanılır.',
         source: DEFAULT_PROJECT_INTRO_DECK_TITLE,
       },
       {
@@ -133,9 +133,9 @@
         deckId: DEFAULT_PROJECT_INTRO_DECK_ID,
         deckTitle: DEFAULT_PROJECT_INTRO_DECK_TITLE,
         cardIndex: 9,
-        question: 'Bu projenin yazılım mühendisliği katkısı nedir?',
+        question: 'Bu uygulamanın yazılım mühendisliği katkısı nedir?',
         answer:
-          'Proje; gereksinim analizi, tasarım, gerçekleştirim, test, kalite ve konfigürasyon yönetimi kavramlarını çalışan bir eğitim yazılımı üzerinde somutlaştırır.',
+          'Uygulama; gereksinim analizi, tasarım, gerçekleştirim, test, kalite ve konfigürasyon yönetimi kavramlarını çalışan bir eğitim yazılımı üzerinde somutlaştırır.',
         source: DEFAULT_PROJECT_INTRO_DECK_TITLE,
       },
     ],

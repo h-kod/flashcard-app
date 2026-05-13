@@ -1,8 +1,16 @@
 # Ders Notlarından Yapay Zeka Destekli Flashcard Üretim Sistemi
 
-## Proje Açıklaması
+## Uygulama Açıklaması
 
-Bu proje, ders notlarından otomatik olarak flashcard ve soru-cevap çiftleri üreten bir web uygulamasıdır. Öğrencilerin ders materyallerini daha etkili bir şekilde gözden geçirmelerini sağlamak amacıyla geliştirilmiştir.
+Bu uygulama, ders notlarından otomatik olarak flashcard ve soru-cevap çiftleri üreten bir web uygulamasıdır. Öğrencilerin ders materyallerini daha etkili bir şekilde gözden geçirmelerini sağlamak amacıyla geliştirilmiştir.
+
+## Ekran Görüntüleri
+
+Ana sayfa ve uygulama tanıtımı arşivi:
+
+![Ana sayfa görünümü](artifacts/home-desktop.png)
+
+![Uygulama tanıtımı sayfası](artifacts/project-intro-page.png)
 
 ## Özellikler
 
@@ -53,7 +61,7 @@ Bu proje, ders notlarından otomatik olarak flashcard ve soru-cevap çiftleri ü
 
 5. **Düzenleyin ve Kaydedin**: Kartları düzenleyip veritabanına kaydedin.
 
-## Proje Yapısı
+## Uygulama Yapısı
 
 ```
 TYZM-623-01-Projem/
@@ -77,18 +85,18 @@ python -m pytest
 
 ## Render ile Yayınlama
 
-Bu proje Render uzerinde Flask web service olarak yayimlanabilir.
+Bu uygulama Render üzerinde Flask web service olarak yayınlanabilir.
 
 1. Repoyu GitHub'a push edin.
-2. Render'da `New > Blueprint` veya `New > Web Service` secin.
-3. Repo baglandiginda su ayarlari kullanin:
+2. Render'da `New > Blueprint` veya `New > Web Service` seçin.
+3. Repo bağlandığında şu ayarları kullanın:
    - Build Command: `pip install -r requirements.txt`
    - Start Command: `gunicorn wsgi:app`
-4. `GEMINI_API_KEY` ortam degiskenini Render panelinden ekleyin.
+4. `GEMINI_API_KEY` ortam değişkenini Render panelinden ekleyin.
 
-Repoda hazir bir [render.yaml](render.yaml) dosyasi vardir. `Blueprint` ile kurulum yaparsaniz bu ayarlar otomatik okunur.
+Repoda hazır bir [render.yaml](render.yaml) dosyası vardır. `Blueprint` ile kurulum yaparsanız bu ayarlar otomatik okunur.
 
-Not: Render varsayilan olarak kalici olmayan bir dosya sistemi kullanir. Bu nedenle `data/*.db` altindaki SQLite verileri deploy sonrasinda korunmaz. Kalici veri gerekiyorsa Render Postgres veya bir persistent disk kullanin.
+Not: Render varsayılan olarak kalıcı olmayan bir dosya sistemi kullanır. Bu nedenle `data/*.db` altındaki SQLite verileri deploy sonrasında korunmaz. Kalıcı veri gerekiyorsa Render Postgres veya bir persistent disk kullanın.
 
 ## License
 
