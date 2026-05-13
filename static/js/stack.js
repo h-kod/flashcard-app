@@ -8,8 +8,6 @@
   const heroFilePill = document.getElementById('hero-file-pill');
   const chooseFileButton = document.getElementById('choose-file-btn');
   const geminiApiKeyField = document.getElementById('gemini_api_key');
-  const heroApiKeyInput = document.getElementById('hero-api-key-input');
-  const heroApiKeySaveButton = document.getElementById('hero-api-key-save');
   const heroHistoryGallery = document.getElementById('hero-history-gallery');
   const apiKeyModal = document.getElementById('api-key-modal');
   const apiKeyModalInput = document.getElementById('api-key-modal-input');
@@ -219,10 +217,6 @@
 
     if (geminiApiKeyField) {
       geminiApiKeyField.value = normalized;
-    }
-
-    if (heroApiKeyInput && heroApiKeyInput.value !== normalized) {
-      heroApiKeyInput.value = normalized;
     }
 
     if (apiKeyModalInput && apiKeyModalInput.value !== normalized) {
@@ -444,20 +438,6 @@
 
   syncGeminiApiKeyInputs((geminiApiKeyField && geminiApiKeyField.value) || getStoredGeminiApiKey());
 
-  if (heroApiKeyInput) {
-    heroApiKeyInput.addEventListener('input', function () {
-      if (geminiApiKeyField) {
-        geminiApiKeyField.value = heroApiKeyInput.value.trim();
-      }
-    });
-  }
-
-  if (heroApiKeySaveButton) {
-    heroApiKeySaveButton.addEventListener('click', function () {
-      persistGeminiApiKey(heroApiKeyInput ? heroApiKeyInput.value : '');
-    });
-  }
-
   if (apiKeyModalInput) {
     apiKeyModalInput.addEventListener('input', function () {
       if (geminiApiKeyField) {
@@ -473,9 +453,6 @@
         return;
       }
       closeApiKeyModal();
-      if (heroApiKeyInput) {
-        heroApiKeyInput.focus();
-      }
     });
   }
 

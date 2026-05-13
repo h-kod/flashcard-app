@@ -144,32 +144,6 @@ body.is-loading .loading-bar__fill {
   box-shadow: var(--shadow-soft);
 }
 
-.hero-api-key-panel {
-  display: grid;
-  gap: 0.9rem;
-  width: min(100%, 520px);
-  padding: 1rem;
-  border: 4px solid var(--line);
-  background: var(--surface);
-  box-shadow: var(--shadow-soft);
-}
-
-.hero-api-key-panel__copy {
-  display: grid;
-  gap: 0.35rem;
-}
-
-.hero-api-key-panel__copy h3 {
-  font-family: 'Bungee', cursive;
-  font-size: clamp(1.05rem, 2vw, 1.35rem);
-  line-height: 1.05;
-}
-
-.hero-api-key-panel__copy p {
-  color: var(--muted);
-  line-height: 1.45;
-}
-
 .hero-api-key-panel__eyebrow {
   display: inline-flex;
   width: fit-content;
@@ -182,18 +156,6 @@ body.is-loading .loading-bar__fill {
   text-transform: uppercase;
 }
 
-.hero-api-key-panel__actions {
-  display: grid;
-  gap: 0.75rem;
-}
-
-.hero-api-key-panel__buttons,
-.api-key-modal__links {
-  display: flex;
-  gap: 0.7rem;
-  flex-wrap: wrap;
-}
-
 .hero-api-key-input {
   width: 100%;
   min-height: 54px;
@@ -203,14 +165,6 @@ body.is-loading .loading-bar__fill {
   color: var(--text);
   font: inherit;
   font-weight: 700;
-}
-
-.hero-api-key-link {
-  text-decoration: none;
-}
-
-.api-key-modal__dialog {
-  width: min(92vw, 560px);
 }
 
 .page-shell > section:not([class]),
@@ -1725,6 +1679,93 @@ button:hover,
   color: var(--accent-pale);
 }
 
+.api-key-modal {
+  z-index: 120;
+}
+
+.api-key-modal .delete-confirm-modal__backdrop {
+  background: rgba(27, 27, 27, 0.62);
+}
+
+.api-key-modal__dialog {
+  width: min(92vw, 560px);
+  padding: clamp(1rem, 3vw, 1.45rem);
+  gap: 0.8rem;
+  border-width: 7px;
+  background: #fbf6e8;
+}
+
+.api-key-modal__dialog h2 {
+  max-width: 12ch;
+  font-size: clamp(1.45rem, 2.8vw, 2.25rem);
+  line-height: 1.08;
+  letter-spacing: 0;
+}
+
+.api-key-modal__dialog p {
+  max-width: 48ch;
+  color: rgba(27, 27, 27, 0.72);
+  font-size: 0.95rem;
+}
+
+.api-key-modal .hero-api-key-input {
+  margin-top: 0.25rem;
+  min-height: 58px;
+  border-width: 4px;
+  background: #fff;
+  box-shadow: inset 0 0 0 2px transparent;
+}
+
+.api-key-modal .hero-api-key-input:focus {
+  outline: 0;
+  box-shadow: inset 0 0 0 2px var(--accent-soft), 5px 5px 0 #1b1b1b;
+}
+
+.api-key-modal__links {
+  display: flex;
+  align-items: center;
+  min-height: 42px;
+}
+
+.api-key-modal__create-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 38px;
+  padding: 0.55rem 0.75rem;
+  border: 4px solid #1b1b1b;
+  background: var(--accent-soft);
+  color: #1b1b1b;
+  box-shadow: 5px 5px 0 #1b1b1b;
+  font-weight: 900;
+  line-height: 1;
+  text-decoration: none;
+  text-transform: uppercase;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.api-key-modal__create-link:hover,
+.api-key-modal__create-link:focus-visible {
+  transform: translate(-2px, -2px);
+  box-shadow: 8px 8px 0 #1b1b1b;
+}
+
+.api-key-modal .delete-confirm-modal__actions {
+  display: grid;
+  grid-template-columns: minmax(120px, 1fr) minmax(180px, 1.5fr);
+  gap: 0.8rem;
+  justify-content: stretch;
+  margin-top: 0.2rem;
+}
+
+.api-key-modal .delete-confirm-modal__cancel,
+.api-key-modal .delete-confirm-modal__accept {
+  width: 100%;
+  min-width: 0;
+  min-height: 58px;
+  text-align: center;
+}
+
 .saved-preview {
   position: absolute;
   inset: 0;
@@ -1938,6 +1979,25 @@ button:hover,
 
   .hero-clear-btn {
     width: 100%;
+  }
+
+  .api-key-modal {
+    padding: 0.8rem;
+  }
+
+  .api-key-modal__dialog {
+    width: min(100%, 520px);
+    border-width: 6px;
+    box-shadow: 8px 8px 0 #1b1b1b;
+  }
+
+  .api-key-modal__dialog h2 {
+    max-width: 100%;
+    font-size: 1.35rem;
+  }
+
+  .api-key-modal .delete-confirm-modal__actions {
+    grid-template-columns: 1fr;
   }
 
   .hero-count-picker {

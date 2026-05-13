@@ -48,7 +48,6 @@
         <div class="hero-preview">
           <div class="hero-preview__toolbar">
             <button type="submit" name="action" value="clear" class="ghost-btn hero-clear-btn">Geri</button>
-            <div id="hero-file-pill" class="hero-file-pill" hidden></div>
           </div>
           <label class="hero-sr-only" for="note_text">Metin yapistir veya dosya birak</label>
           <textarea id="note_text" class="hero-preview__text" name="note_text" placeholder="Ders notunu buraya yapistirin...">{{ input_text }}</textarea>
@@ -64,38 +63,6 @@
             <input id="count-20" type="radio" name="card_count" value="20" {% if selected_count == 20 %}checked{% endif %} />
             <label for="count-20">20</label>
           </fieldset>
-
-          <section class="hero-api-key-panel" aria-labelledby="hero-api-key-title">
-            <div class="hero-api-key-panel__copy">
-              <span class="hero-api-key-panel__eyebrow">Gemini API</span>
-              <h3 id="hero-api-key-title">Kendi API anahtarini kullan</h3>
-              <p>Her kullanici kendi Gemini API key bilgisini girebilir. Anahtar bu tarayicida saklanir ve yeni not uretiminde kullanilir.</p>
-            </div>
-            <div class="hero-api-key-panel__actions">
-              <label class="hero-sr-only" for="hero-api-key-input">Gemini API Key</label>
-              <input
-                id="hero-api-key-input"
-                class="hero-api-key-input"
-                type="password"
-                inputmode="text"
-                autocomplete="off"
-                spellcheck="false"
-                placeholder="AIza..."
-                value="{{ user_gemini_api_key }}"
-              />
-              <div class="hero-api-key-panel__buttons">
-                <button id="hero-api-key-save" type="button" class="ghost-btn">Anahtari Kaydet</button>
-                <a
-                  class="control-btn hero-api-key-link"
-                  href="https://aistudio.google.com/app/apikey"
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  API Key Olustur
-                </a>
-              </div>
-            </div>
-          </section>
 
           <button type="submit" class="cta-btn hero-generate-btn">Kartlari Olustur</button>
         </div>
@@ -128,7 +95,7 @@
     aria-labelledby="api-key-modal-title"
     aria-describedby="api-key-modal-description"
   >
-    <span class="delete-confirm-modal__eyebrow">API KEY GEREKLI</span>
+    <span class="delete-confirm-modal__eyebrow">Gemini API</span>
     <h2 id="api-key-modal-title">Yeni not olusturmadan once Gemini API key gir</h2>
     <p id="api-key-modal-description">Kart uretimi icin kisisel Gemini API key gerekli. Asagidaki baglantidan olusturup hemen ekleyebilirsin.</p>
     <label class="hero-sr-only" for="api-key-modal-input">Gemini API Key</label>
@@ -140,9 +107,10 @@
       autocomplete="off"
       spellcheck="false"
       placeholder="AIza..."
+      value="{{ user_gemini_api_key }}"
     />
     <div class="api-key-modal__links">
-      <a class="control-btn hero-api-key-link" href="https://aistudio.google.com/app/apikey" target="_blank" rel="noreferrer">
+      <a class="api-key-modal__create-link" href="https://aistudio.google.com/app/apikey" target="_blank" rel="noreferrer">
         API Key Olustur
       </a>
     </div>
