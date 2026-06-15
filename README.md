@@ -31,8 +31,8 @@ Ana sayfa ve uygulama tanıtımı arşivi:
 
 1. **Depoyu Klonlayın**:
    ```bash
-   git clone https://github.com/h-kod/TYZM-623-01-Projem.git
-   cd TYZM-623-01-Projem
+   git clone https://github.com/h-kod/flashcard-app.git
+   cd flashcard-app
    ```
 
 2. **Sanal Ortam Oluşturun ve Aktifleştirin**:
@@ -64,7 +64,7 @@ Ana sayfa ve uygulama tanıtımı arşivi:
 ## Uygulama Yapısı
 
 ```
-TYZM-623-01-Projem/
+flashcard-app/
 ├── app/                 # Flask uygulaması
 ├── data/                # Veritabanı ve veri dosyaları
 ├── static/              # CSS, JS, resimler
