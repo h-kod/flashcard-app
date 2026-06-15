@@ -1,103 +1,59 @@
-# Ders Notlarından Yapay Zeka Destekli Flashcard Üretim Sistemi
+# AI-Powered Flashcard App
 
-## Uygulama Açıklaması
+Girdiğiniz herhangi bir not, yazı veya belgeden otomatik olarak yapay zeka destekli flashcard ve soru-cevap çiftleri üreten Flask tabanlı bir web uygulamasıdır.
 
-Bu uygulama, ders notlarından otomatik olarak flashcard ve soru-cevap çiftleri üreten bir web uygulamasıdır. Öğrencilerin ders materyallerini daha etkili bir şekilde gözden geçirmelerini sağlamak amacıyla geliştirilmiştir.
+## 🚀 Özellikler
+- **Metin & Dosya Girişi:** İstediğiniz herhangi bir notu/yazıyı girin veya UTF-8 formatlı dosyaları yükleyin.
+- **Otomatik Soru/Kart Üretimi:** Yapay zeka ile otomatik flashcard ve soru-cevap çiftleri oluşturun.
+- **Düzenleme & Kaydetme:** Üretilen kartları düzenleyin ve SQLite veritabanında saklayın.
 
-## Ekran Görüntüleri
+## 📸 Ekran Görüntüleri
+| Ana Sayfa | Proje Tanıtımı |
+| --- | --- |
+| ![Ana Sayfa](artifacts/home-desktop.png) | ![Uygulama Tanıtımı](artifacts/project-intro-page.png) |
 
-Ana sayfa ve uygulama tanıtımı arşivi:
+## 🛠️ Kurulum ve Çalıştırma
 
-![Ana sayfa görünümü](artifacts/home-desktop.png)
-
-![Uygulama tanıtımı sayfası](artifacts/project-intro-page.png)
-
-## Özellikler
-
-- **Metin Girişi ve Dosya Yükleme**: Kullanıcılar ders notlarını metin olarak girebilir veya UTF-8 olarak okunabilen dosya içeriği kullanabilir.
-- **Otomatik Flashcard Üretimi**: Metinden önemli kavramları ve cümleleri çıkarır ve flashcard'lar oluşturur.
-- **Soru-Cevap Üretimi**: Metinden otomatik olarak soru-cevap çiftleri üretir.
-- **Düzenleme ve Kaydetme**: Üretilen kartları düzenleyebilir ve SQLite veritabanında saklayabilirsiniz.
-- **Web Arayüzü**: Flask tabanlı basit ve kullanıcı dostu web arayüzü.
-
-## Teknolojiler
-
-- **Backend**: Python, Flask, requests
-- **Frontend**: HTML, CSS, Jinja2, JavaScript
-- **Veritabanı**: SQLite
-- **Test**: pytest
-
-## Kurulum
-
-1. **Depoyu Klonlayın**:
+1. **Depoyu Klonlayın ve Klasöre Geçin:**
    ```bash
    git clone https://github.com/h-kod/flashcard-app.git
    cd flashcard-app
    ```
 
-2. **Sanal Ortam Oluşturun ve Aktifleştirin**:
+2. **Sanal Ortamı Hazırlayın ve Paketleri Yükleyin:**
    ```bash
    python -m venv .venv
-   .venv\Scripts\activate  # Windows için
-   ```
-
-3. **Gerekli Paketleri Yükleyin**:
-   ```bash
+   .venv\Scripts\activate  # Windows
+   # source .venv/bin/activate  # macOS/Linux
    pip install -r requirements.txt
    ```
 
-## Kullanım
-
-1. **Uygulamayı Çalıştırın**:
+3. **Uygulamayı Çalıştırın:**
    ```bash
    python run.py
    ```
+   Tarayıcınızda `http://localhost:5000` adresinden uygulamaya erişebilirsiniz.
 
-2. **Tarayıcıda Açın**: `http://localhost:5000`
-
-3. **Ders Notlarını Yükleyin veya Girin**: Ana sayfada metin girin veya uygulamanın kabul ettiği dosya girişini kullanın.
-
-4. **Flashcard'ları ve Soru-Cevap Çiftlerini Üretin**: Uygulama otomatik olarak kartları oluşturacaktır.
-
-5. **Düzenleyin ve Kaydedin**: Kartları düzenleyip veritabanına kaydedin.
-
-## Uygulama Yapısı
-
-```
-flashcard-app/
-├── app/                 # Flask uygulaması
-├── data/                # Veritabanı ve veri dosyaları
-├── static/              # CSS, JS, resimler
-├── templates/           # HTML şablonları
-├── tests/               # Test dosyaları
-├── requirements.txt     # Python bağımlılıkları
-├── run.py               # Uygulama başlatma dosyası
-└── README.md            # Bu dosya
-```
-
-## Testing
-
-Automated tests can be run with:
-
+## 🧪 Testleri Çalıştırma
 ```bash
 python -m pytest
 ```
 
-## Render ile Yayınlama
+## 📁 Proje Yapısı
 
-Bu uygulama Render üzerinde Flask web service olarak yayınlanabilir.
+```
+flashcard-app/
+├── app/                 # Flask backend (rotalar, modeller, NLP ve API istemcisi)
+├── data/                # SQLite veritabanı ve veri saklama alanı
+├── static/              # İstemci tarafı varlıkları (CSS, JS, resimler)
+├── templates/           # HTML (Jinja2) arayüz şablonları
+├── tests/               # Birim testleri (pytest)
+├── uml/                 # UML tasarım diyagramları ve otomatik diyagram üreten betik
+├── requirements.txt     # Python kütüphane bağımlılıkları
+├── run.py               # Uygulamayı yerelde çalıştıran dosya
+├── wsgi.py              # Sunucu dağıtım (WSGI) giriş noktası
+└── render.yaml          # Render.com bulut dağıtım yapılandırması
+```
 
-1. Repoyu GitHub'a push edin.
-2. Render'da `New > Blueprint` veya `New > Web Service` seçin.
-3. Repo bağlandığında şu ayarları kullanın:
-   - Build Command: `pip install -r requirements.txt`
-   - Start Command: `gunicorn wsgi:app`
-4. `GEMINI_API_KEY` ortam değişkenini Render panelinden ekleyin.
-
-Repoda hazır bir [render.yaml](render.yaml) dosyası vardır. `Blueprint` ile kurulum yaparsanız bu ayarlar otomatik okunur.
-
-Not: Render varsayılan olarak kalıcı olmayan bir dosya sistemi kullanır. Bu nedenle `data/*.db` altındaki SQLite verileri deploy sonrasında korunmaz. Kalıcı veri gerekiyorsa Render Postgres veya bir persistent disk kullanın.
-
-## License
-
-This project is licensed under the MIT License.
+## 📄 Lisans
+Bu proje [MIT Lisansı](LICENSE) altında lisanslanmıştır.
